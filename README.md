@@ -20,3 +20,5 @@ of the first `<script></script>` block in `index.html`.
 ## Deployment
 
 Static site, wherever you want it.
+
+To automate, put instructions in `./deploy.sh`.
