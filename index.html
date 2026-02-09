@@ -58,6 +58,77 @@
             letter-spacing: -0.02em;
         }
 
+        .progress-notification {
+            background: linear-gradient(135deg, rgba(74, 242, 161, 0.1), rgba(45, 212, 191, 0.1));
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.4s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .progress-notification.hidden {
+            display: none;
+        }
+
+        .progress-notification-text {
+            font-family: 'Work Sans', sans-serif;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .progress-notification-text strong {
+            color: var(--accent-primary);
+        }
+
+        .progress-notification-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .reset-progress-btn, .dismiss-notification-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .reset-progress-btn {
+            border-color: var(--reveal-timer);
+            color: var(--reveal-timer);
+        }
+
+        .reset-progress-btn:hover {
+            background: var(--reveal-timer);
+            color: var(--bg-primary);
+        }
+
+        .dismiss-notification-btn:hover {
+            background: var(--border-color);
+        }
+
         .lesson-selector {
             display: flex;
             gap: 1rem;
@@ -518,6 +589,83 @@
             to { opacity: 1; }
         }
 
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--bg-secondary);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            max-width: 500px;
+            animation: modalPop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes modalPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal h3 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-btn-cancel {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-btn-cancel:hover {
+            background: var(--border-color);
+        }
+
+        .modal-btn-confirm {
+            background: var(--reveal-timer);
+            color: var(--bg-primary);
+        }
+
+        .modal-btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 158, 11, 0.3);
+        }
+
         blockquote {
             border-left: 4px solid var(--accent-secondary);
             padding-left: 1.5rem;
@@ -560,6 +708,19 @@
                 <option value="">Choose a lesson...</option>
             </select>
         </div>
+        <div id="progress-notification" class="progress-notification hidden">
+            <div class="progress-notification-text">
+                <span id="progress-message"></span>
+            </div>
+            <div class="progress-notification-actions">
+                <button class="dismiss-notification-btn" onclick="window.lessonViewer.dismissNotification()">
+                    Dismiss
+                </button>
+                <button class="reset-progress-btn" onclick="window.lessonViewer.confirmResetProgress()">
+                    Reset Progress
+                </button>
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -601,6 +762,7 @@
          this.currentStage = 0;
          this.completedStages = new Set();
          this.timedReveals = new Map();
+         this.currentLessonFile = null;
          this.init();
        }
 
@@ -635,7 +797,30 @@
            const response = await fetch(filename);
            if (!response.ok) throw new Error('Failed to load lesson');
            const markdown = await response.text();
+           
+           // Check if we're switching lessons
+           const switchingLesson = this.currentLessonFile && this.currentLessonFile !== filename;
+           this.currentLessonFile = filename;
+           
+           // Load progress for this specific lesson
+           this.loadProgress();
+           
            this.parseAndRender(markdown);
+           
+           // Show appropriate notification
+           if (this.completedStages.size > 0) {
+             this.showProgressNotification(
+               `<strong>Progress Restored:</strong> You've completed ${this.completedStages.size} stage${this.completedStages.size === 1 ? '' : 's'} in this lesson.`
+             );
+           } else if (switchingLesson) {
+             this.showProgressNotification(
+               `<strong>New Lesson:</strong> Starting fresh - no saved progress for this lesson yet.`
+             );
+           } else {
+             this.showProgressNotification(
+               `<strong>Lesson Loaded:</strong> Ready to begin! Complete stages to track your progress.`
+             );
+           }
          } catch (error) {
            console.error('Error loading lesson:', error);
            document.getElementById('lesson-content').innerHTML = 
@@ -966,19 +1151,114 @@
        }
 
        saveProgress() {
-         localStorage.setItem('lessonProgress', JSON.stringify({
+         if (!this.currentLessonFile) return;
+         
+         const progressData = {
            currentStage: this.currentStage,
-           completedStages: Array.from(this.completedStages)
-         }));
+           completedStages: Array.from(this.completedStages),
+           lastUpdated: new Date().toISOString()
+         };
+         
+         localStorage.setItem(
+           `lessonProgress_${this.currentLessonFile}`,
+           JSON.stringify(progressData)
+         );
        }
 
        loadProgress() {
-         const saved = localStorage.getItem('lessonProgress');
+         if (!this.currentLessonFile) return;
+         
+         const saved = localStorage.getItem(`lessonProgress_${this.currentLessonFile}`);
          if (saved) {
-           const data = JSON.parse(saved);
-           this.currentStage = data.currentStage || 0;
-           this.completedStages = new Set(data.completedStages || []);
+           try {
+             const data = JSON.parse(saved);
+             this.currentStage = data.currentStage || 0;
+             this.completedStages = new Set(data.completedStages || []);
+           } catch (e) {
+             console.error('Error loading progress:', e);
+             this.currentStage = 0;
+             this.completedStages = new Set();
+           }
+         } else {
+           this.currentStage = 0;
+           this.completedStages = new Set();
          }
+       }
+
+       showProgressNotification(message) {
+         const notification = document.getElementById('progress-notification');
+         const messageEl = document.getElementById('progress-message');
+         
+         messageEl.innerHTML = message;
+         notification.classList.remove('hidden');
+         
+         // Auto-hide after 10 seconds
+         setTimeout(() => {
+           if (!notification.classList.contains('hidden')) {
+             notification.classList.add('hidden');
+           }
+         }, 10000);
+       }
+
+       dismissNotification() {
+         document.getElementById('progress-notification').classList.add('hidden');
+       }
+
+       confirmResetProgress() {
+         // Create confirmation modal
+         const overlay = document.createElement('div');
+         overlay.className = 'overlay';
+         
+         const modal = document.createElement('div');
+         modal.className = 'modal';
+         modal.innerHTML = `
+           <h3>⚠️ Reset Progress?</h3>
+           <p>This will clear all your completed stages and start this lesson from the beginning. This action cannot be undone.</p>
+           <div class="modal-actions">
+             <button class="modal-btn modal-btn-cancel" onclick="window.lessonViewer.closeModal()">
+               Cancel
+             </button>
+             <button class="modal-btn modal-btn-confirm" onclick="window.lessonViewer.resetProgress()">
+               Reset Progress
+             </button>
+           </div>
+         `;
+         
+         document.body.appendChild(overlay);
+         document.body.appendChild(modal);
+         
+         // Store references for cleanup
+         this.currentModal = { overlay, modal };
+       }
+
+       closeModal() {
+         if (this.currentModal) {
+           this.currentModal.overlay.remove();
+           this.currentModal.modal.remove();
+           this.currentModal = null;
+         }
+       }
+
+       resetProgress() {
+         if (!this.currentLessonFile) return;
+         
+         // Clear localStorage for this lesson
+         localStorage.removeItem(`lessonProgress_${this.currentLessonFile}`);
+         
+         // Reset internal state
+         this.currentStage = 0;
+         this.completedStages = new Set();
+         
+         // Close modal
+         this.closeModal();
+         
+         // Reload lesson to show fresh state
+         this.loadLesson(this.currentLessonFile);
+         
+         // Show notification
+         this.showProgressNotification(
+           `<strong>Progress Reset:</strong> Starting fresh - all progress has been cleared.`
+         );
        }
      }
 

@@ -772,6 +772,35 @@ Submit your notebook with:
 
 ## Support and Questions
 
+### Progress Tracking
+
+The viewer automatically tracks student progress using browser localStorage:
+
+**Features:**
+- **Automatic saving:** Progress saves when students complete stages
+- **Per-lesson tracking:** Each lesson has independent progress
+- **Persistent across sessions:** Students can close and return later
+- **Visual feedback:** Progress bar shows completion percentage
+- **Restore notification:** Banner shows when returning with saved progress
+- **Reset option:** Students can clear progress and start over
+
+**Progress notifications appear when:**
+1. **First load:** "Lesson Loaded: Ready to begin!"
+2. **Returning student:** "Progress Restored: You've completed X stages"
+3. **Switching lessons:** "New Lesson: Starting fresh"
+4. **After reset:** "Progress Reset: Starting fresh"
+
+**Data stored per lesson:**
+- Current active stage
+- List of completed stages
+- Last update timestamp
+
+**Student controls:**
+- **Dismiss:** Hide notification banner
+- **Reset Progress:** Clear all progress (with confirmation modal)
+
+**Privacy note:** All data is stored locally in the browser. No server communication occurs.
+
 If you have questions about creating lesson plans:
 1. Review the example: `lesson-projectile-simulator.md`
 2. Check that your markdown follows the structure patterns
