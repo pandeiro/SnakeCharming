@@ -413,26 +413,11 @@
             color: var(--bg-primary);
         }
 
-        .partial-code {
-            position: relative;
-        }
-
-        .partial-hidden {
-            filter: blur(8px);
-            user-select: none;
-            pointer-events: none;
-            opacity: 0.3;
-        }
-
-        .partial-visible {
-            opacity: 1;
-        }
-
         .fill-in-prompt {
             background: rgba(245, 158, 11, 0.1);
             border-left: 4px solid var(--reveal-timer);
             padding: 1rem 1.5rem;
-            margin: 1rem 0;
+            margin: 1rem 0 0.5rem 0;
             border-radius: 8px;
             font-family: 'Work Sans', sans-serif;
             color: var(--text-primary);
@@ -739,20 +724,12 @@
      const LESSONS = [
        {
          name: 'Projectile Simulator',
-         file: 'lessons/projectile-simulator.md'
+         file: 'projectile-simulator.md'
        }
        // Add more lessons here as { name: 'Lesson Name', file: 'filename.md' }
      ];
 
-     // Code blocks that should have timed reveals (for student practice)
-     const TIMED_REVEAL_PATTERNS = [
-       /import\s+numpy/i,  // Initial imports
-       /def\s+calculate_trajectory/i,  // Function definitions
-       /def\s+calculate_trajectory_with_drag/i,
-       /for\s+angle\s+in\s+range/i,  // Optimization loop
-       /from\s+ipywidgets/i,  // Interactive widgets
-     ];
-
+     // Only code blocks with <!-- PARTIAL_REVEAL --> marker get timed reveals
      const REVEAL_DELAY = 120; // seconds
      const PARTIAL_REVEAL_MARKER = '<!-- PARTIAL_REVEAL -->';
 
@@ -763,6 +740,8 @@
          this.completedStages = new Set();
          this.timedReveals = new Map();
          this.currentLessonFile = null;
+         this.revealQueue = []; // Track order of reveals
+         this.observedElements = new Set();
          this.init();
        }
 
@@ -773,6 +752,21 @@
            if (e.target.value) {
              this.loadLesson(e.target.value);
            }
+         });
+         this.setupIntersectionObserver();
+       }
+
+       setupIntersectionObserver() {
+         this.observer = new IntersectionObserver((entries) => {
+           entries.forEach(entry => {
+             if (entry.isIntersecting) {
+               const revealId = entry.target.id;
+               this.checkAndStartReveal(revealId);
+             }
+           });
+         }, {
+           threshold: 0.5, // Element is 50% visible
+           rootMargin: '0px'
          });
        }
 
@@ -794,7 +788,7 @@
 
        async loadLesson(filename) {
          try {
-           const response = await fetch(filename);
+           const response = await fetch(`lessons/${filename}`);
            if (!response.ok) throw new Error('Failed to load lesson');
            const markdown = await response.text();
            
@@ -855,10 +849,19 @@
          const container = document.getElementById('lesson-content');
          container.innerHTML = '';
 
+         // Clear previous observers
+         this.observedElements.clear();
+         this.revealQueue = [];
+
          this.stages.forEach((stageMarkdown, index) => {
            const stageEl = this.createStageElement(stageMarkdown, index);
            container.appendChild(stageEl);
          });
+
+         // Setup intersection observers for reveal elements after rendering
+         setTimeout(() => {
+           this.setupRevealObservers();
+         }, 100);
        }
 
        createStageElement(markdown, index) {
@@ -955,59 +958,54 @@
            const hasPartialReveal = code.includes('<!-- PARTIAL_REVEAL -->');
            
            if (hasPartialReveal) {
-             // Split code at marker
+             // Split code at marker and remove the marker from display
              const parts = code.split('<!-- PARTIAL_REVEAL -->');
-             const visiblePart = parts[0];
-             const hiddenPart = parts[1] || '';
+             const visiblePart = parts[0].trim();
+             const hiddenPart = parts[1] ? parts[1].trim() : '';
              
              const revealId = `reveal-${stageIndex}-${blockCounter}`;
-             this.initTimedReveal(revealId, REVEAL_DELAY, true);
              
+             // Register this reveal in the queue (don't start timer yet)
+             this.revealQueue.push({
+               id: revealId,
+               started: false,
+               completed: false
+             });
+             
+             // Store reveal data for later initialization
+             this.timedReveals.set(revealId, {
+               remaining: REVEAL_DELAY,
+               interval: null,
+               isPartial: true,
+               started: false
+             });
+             
+             // Return two separate code blocks:
+             // 1. The visible part (always shown)
+             // 2. The hidden part (revealed after timer)
              return `
                             <div class="fill-in-prompt">
                                 <strong>✏️ Try It Yourself</strong>
                                 Fill in the missing values before the solution reveals!
                             </div>
-                            <div class="code-block-wrapper timed-reveal partial-code" id="${revealId}">
+                            <pre><code${attrs}>${this.escapeHtml(visiblePart)}</code></pre>
+                            <div class="code-block-wrapper timed-reveal partial-code" id="${revealId}" data-reveal-pending="true">
                                 <div class="reveal-overlay">
                                     <div class="reveal-message">
-                                        💡 Fill in the missing code yourself!
+                                        💡 Complete the code above yourself!<br>
+                                        <small style="opacity: 0.7; font-size: 0.85em;">Timer starts when you scroll here and previous reveals are complete</small>
                                     </div>
-                                    <div class="reveal-countdown"></div>
-                                    <button class="skip-reveal-btn" onclick="window.lessonViewer.skipReveal('${revealId}')">
-                                        Skip Timer (I'm Done!)
-                                    </button>
-                                </div>
-                                <pre><code${attrs}><span class="partial-visible">${visiblePart}</span><span class="partial-hidden" data-reveal-content="${this.escapeHtml(hiddenPart)}">${hiddenPart}</span></code></pre>
-                            </div>
-             `;
-           }
-           
-           // Standard timed reveal
-           const shouldReveal = TIMED_REVEAL_PATTERNS.some(pattern => 
-             pattern.test(code)
-           );
-
-           if (shouldReveal) {
-             const revealId = `reveal-${stageIndex}-${blockCounter}`;
-             this.initTimedReveal(revealId, REVEAL_DELAY, false);
-             
-             return `
-                            <div class="code-block-wrapper timed-reveal" id="${revealId}">
-                                <div class="reveal-overlay">
-                                    <div class="reveal-message">
-                                        💡 Try implementing this yourself first!
-                                    </div>
-                                    <div class="reveal-countdown"></div>
-                                    <button class="skip-reveal-btn" onclick="window.lessonViewer.skipReveal('${revealId}')">
+                                    <div class="reveal-countdown" style="display: none;"></div>
+                                    <button class="skip-reveal-btn" onclick="window.lessonViewer.skipReveal('${revealId}')" style="display: none;">
                                         Skip Timer (Show Solution)
                                     </button>
                                 </div>
-                                <pre><code${attrs}>${code}</code></pre>
+                                <pre><code${attrs}>${this.escapeHtml(hiddenPart)}</code></pre>
                             </div>
              `;
            }
 
+           // Regular code block - no special treatment
            return match;
          });
        }
@@ -1016,6 +1014,56 @@
          const div = document.createElement('div');
          div.textContent = text;
          return div.innerHTML;
+       }
+
+       checkAndStartReveal(revealId) {
+         // Find this reveal in the queue
+         const currentIndex = this.revealQueue.findIndex(r => r.id === revealId);
+         if (currentIndex === -1) return;
+         
+         const currentReveal = this.revealQueue[currentIndex];
+         if (currentReveal.started || currentReveal.completed) return;
+         
+         // Check if all previous reveals are completed
+         const allPreviousCompleted = this.revealQueue
+                                          .slice(0, currentIndex)
+                                          .every(r => r.completed);
+         
+         if (!allPreviousCompleted) {
+           // Not ready yet - previous reveals still pending
+           return;
+         }
+         
+         // All previous reveals are done, start this one
+         const element = document.getElementById(revealId);
+         if (!element) return;
+         
+         // Mark as started
+         currentReveal.started = true;
+         element.removeAttribute('data-reveal-pending');
+         
+         // Show countdown and skip button
+         const countdown = element.querySelector('.reveal-countdown');
+         const skipBtn = element.querySelector('.skip-reveal-btn');
+         const message = element.querySelector('.reveal-message');
+         
+         if (countdown) countdown.style.display = 'block';
+         if (skipBtn) skipBtn.style.display = 'block';
+         if (message) message.innerHTML = '💡 Complete the code above yourself!';
+         
+         // Start the timer
+         this.initTimedReveal(revealId, REVEAL_DELAY, true);
+       }
+
+       setupRevealObservers() {
+         // Set up intersection observers for all reveal elements
+         this.revealQueue.forEach(reveal => {
+           const element = document.getElementById(reveal.id);
+           if (element && !this.observedElements.has(reveal.id)) {
+             this.observer.observe(element);
+             this.observedElements.add(reveal.id);
+           }
+         });
        }
 
        initTimedReveal(revealId, delay, isPartial) {
@@ -1065,26 +1113,25 @@
          const timerData = this.timedReveals.get(revealId);
          const overlay = element.querySelector('.reveal-overlay');
          
-         if (timerData && timerData.isPartial) {
-           // Partial reveal - unblur the hidden part
-           const hiddenSpan = element.querySelector('.partial-hidden');
-           if (hiddenSpan) {
-             hiddenSpan.classList.remove('partial-hidden');
-             hiddenSpan.classList.add('partial-visible');
-           }
+         // Mark as completed in queue
+         const reveal = this.revealQueue.find(r => r.id === revealId);
+         if (reveal) {
+           reveal.completed = true;
          }
          
          // Fade out overlay
-         overlay.style.animation = 'fadeOut 0.5s ease';
-         setTimeout(() => {
-           overlay.remove();
-           element.classList.remove('timed-reveal');
-           
-           // Re-apply syntax highlighting
-           element.querySelectorAll('pre code').forEach(block => {
-             hljs.highlightElement(block);
-           });
-         }, 500);
+         if (overlay) {
+           overlay.style.animation = 'fadeOut 0.5s ease';
+           setTimeout(() => {
+             overlay.remove();
+             element.classList.remove('timed-reveal');
+             
+             // Re-apply syntax highlighting
+             element.querySelectorAll('pre code').forEach(block => {
+               hljs.highlightElement(block);
+             });
+           }, 500);
+         }
        }
 
        completeStage(index) {

@@ -74,8 +74,10 @@ g = 9.81  # gravity (m/s²)
 v0 = ???   # initial velocity (m/s) - try a value between 10-30
 theta = ???  # launch angle (degrees) - try between 30-60
 <!-- PARTIAL_REVEAL -->
-v0 = 20    # initial velocity (m/s)
-theta = 45  # launch angle (degrees)
+# Recommended initial values:
+g = 9.81  # gravity (m/s²)
+v0 = 20    # initial velocity (m/s) - about 45 mph
+theta = 45  # launch angle (degrees) - classic projectile angle
 ```
 
 **Key Concept:** Variables store values you'll use throughout your code. Using meaningful names like `g` for gravity makes code readable.
@@ -98,6 +100,8 @@ theta_rad = np.radians(theta)  # Convert degrees to radians
 vx = v0 * ???(theta_rad)    # Horizontal velocity component
 vy = v0 * ???(theta_rad)    # Vertical velocity component
 <!-- PARTIAL_REVEAL -->
+# Complete solution:
+theta_rad = np.radians(theta)
 vx = v0 * np.cos(theta_rad)    # Horizontal velocity component
 vy = v0 * np.sin(theta_rad)    # Vertical velocity component
 ```

@@ -112,78 +112,105 @@ The viewer automatically applies timed reveals to code blocks matching these pat
 
 ### Partial Code Reveals (Fill-in-the-Blank)
 
-**NEW FEATURE:** For pedagogical scenarios where you want students to complete partially-shown code, use the special marker `<!-- PARTIAL_REVEAL -->` within your code block:
+**NEW FEATURE:** For pedagogical scenarios where you want students to complete partially-shown code, use the special marker `<!-- PARTIAL_REVEAL -->` within your code block.
+
+**How it works:**
+The content is split into **two separate code blocks**:
+1. **First block (visible):** Shows immediately - this is what students see and should work with
+2. **Second block (hidden):** Starts hidden behind an overlay - this is the complete solution
+
+**Syntax:**
 
 ````markdown
 ```python
-# Constants for projectile motion
+# This part shows immediately - the student sees this
 g = 9.81  # gravity (m/s²)
-v0 = ???   # initial velocity (m/s) - what should this be?
-theta = ???  # launch angle (degrees) - what should this be?
+v0 = ???   # What should this value be?
+theta = ???  # What should this value be?
 <!-- PARTIAL_REVEAL -->
+# This entire block is hidden initially - the complete solution
+g = 9.81  # gravity (m/s²)
 v0 = 20    # initial velocity (m/s)
 theta = 45  # launch angle (degrees)
 ```
 ````
 
-**How it works:**
-1. Everything **before** `<!-- PARTIAL_REVEAL -->` shows normally
-2. Everything **after** the marker is blurred/hidden
-3. Student has 2 minutes to fill in the values themselves
-4. After timer expires (or student clicks "Skip Timer"), the full solution reveals
-5. Student can click "Skip Timer (I'm Done!)" button when ready to check their work
-
-**Example use cases:**
-- Physics constants: Show variable names, hide values
-- Configuration parameters: Show structure, hide correct settings
-- Function scaffolding: Show signature and comments, hide implementation
-- Algorithm setup: Show initialization, hide the computation
-- Data structures: Show empty structure, hide populated values
+**Important:** The entire solution code should be repeated below the `<!-- PARTIAL_REVEAL -->` marker. Don't try to show only the "missing parts" - show the complete, working code block.
 
 **Visual presentation:**
-- A yellow "Try It Yourself" banner appears above the code
-- Visible part shows normally
-- Hidden part is blurred with reduced opacity
-- Overlay includes skip button for self-paced learning
-- After reveal, hidden part becomes visible with smooth transition
-
-**Best Practices:**
-1. Make the visible part meaningful - show enough context
-2. Keep the hidden part focused - one clear concept to fill in
-3. Use comments in visible part to guide students
-4. Don't hide too much - this isn't about memorization
-5. Place fill-in exercises at moments of application, not initial introduction
+1. Yellow "Try It Yourself" banner appears
+2. First code block displays normally (the partial/scaffold code)
+3. Second code block is hidden behind overlay with message: "Complete the code above yourself!"
+4. Timer only starts when:
+   - Student scrolls the hidden block into view AND
+   - All previous timed reveals have been completed
+5. Student can click "Skip Timer (Show Solution)" anytime
+6. After timer expires or skip, overlay fades away revealing the complete solution
 
 **Example - Good partial reveal:**
+
 ````markdown
 ```python
-# Calculate trajectory components
+# Calculate velocity components - fill in the trig functions
 theta_rad = np.radians(theta)
-vx = ???  # Hint: use cosine for horizontal component
-vy = ???  # Hint: use sine for vertical component
+vx = v0 * ???(theta_rad)  # Hint: horizontal uses cosine
+vy = v0 * ???(theta_rad)  # Hint: vertical uses sine
 <!-- PARTIAL_REVEAL -->
+# Complete solution:
+theta_rad = np.radians(theta)
 vx = v0 * np.cos(theta_rad)
 vy = v0 * np.sin(theta_rad)
 ```
 ````
 
-**Example - Bad partial reveal (too much hidden):**
+**Example - Setting up physics constants:**
+
 ````markdown
 ```python
-# Calculate everything
+# Set up the initial conditions for our projectile
+g = 9.81  # gravity (m/s²) 
+v0 = ???   # Try a value between 10-30 m/s
+theta = ???  # Try an angle between 30-60 degrees
 <!-- PARTIAL_REVEAL -->
-theta_rad = np.radians(theta)
-vx = v0 * np.cos(theta_rad)
-vy = v0 * np.sin(theta_rad)
-t_flight = 2 * vy / g
+# Recommended values:
+g = 9.81
+v0 = 20    # 20 m/s ≈ 45 mph
+theta = 45  # Classic projectile angle
 ```
 ````
 
-**Best Practices:**
-1. Place "practice code" (code students should write themselves) in blocks that will auto-reveal
-2. For partial reveals, mark with a comment above: `# Fill in the missing values below`
-3. Give students enough time (default 2 minutes) to attempt before reveal
-4. Always provide hints in comments for what should go in the blanks
+**Best practices:**
+1. **Provide scaffolding:** Show structure, variable names, comments as hints
+2. **Use `???` or `____`:** Make it obvious what needs to be filled in
+3. **Repeat complete solution:** Always show the full working code below the marker
+4. **Add helpful comments:** Guide students with hints in the visible part
+5. **Keep it focused:** One clear concept per reveal (don't hide multiple unrelated things)
+6. **Test the scaffold:** Make sure the visible part makes sense on its own
+
+**What NOT to do:**
+❌ Don't show only the missing snippets below the marker:
+````markdown
+```python
+vx = v0 * ???(theta_rad)
+<!-- PARTIAL_REVEAL -->
+np.cos  # This alone is confusing!
+```
+````
+
+✅ Do show the complete solution:
+````markdown
+```python
+vx = v0 * ???(theta_rad)
+<!-- PARTIAL_REVEAL -->
+vx = v0 * np.cos(theta_rad)  # Complete line!
+```
+````
+
+**Timer behavior:**
+- Timer starts only when the hidden block scrolls into view
+- Timer waits for all previous reveals to complete first (sequential learning)
+- Students control their pace with the "Skip Timer" button
+- Default timer: 120 seconds (2 minutes)
 
 ---
 
