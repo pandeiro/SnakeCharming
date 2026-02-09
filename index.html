@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Lesson Plan</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Crimson+Pro:wght@400;600;700&family=Work+Sans:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/nord.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/11.1.1/marked.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e16;
+            --bg-secondary: #141922;
+            --bg-tertiary: #1e2532;
+            --accent-primary: #4af2a1;
+            --accent-secondary: #2dd4bf;
+            --text-primary: #e8eef5;
+            --text-secondary: #9ba8bc;
+            --text-muted: #5c6b84;
+            --code-bg: #0d1117;
+            --border-color: #2a3544;
+            --stage-complete: #059669;
+            --reveal-timer: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Pro', serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            padding: 2.5rem 2rem;
+            border-bottom: 2px solid var(--accent-primary);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .lesson-selector {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .lesson-selector label {
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .lesson-selector select {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-selector select:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .progress-bar {
+            position: sticky;
+            top: 140px;
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            z-index: 50;
+        }
+
+        .progress-track {
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-secondary), var(--accent-primary));
+            border-radius: 4px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 20px rgba(74, 242, 161, 0.4);
+        }
+
+        .progress-label {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        .stage {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 2px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stage.locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .stage.completed {
+            border-color: var(--stage-complete);
+        }
+
+        .stage-header {
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s ease;
+        }
+
+        .stage-header:hover {
+            background: #242d3d;
+        }
+
+        .stage-header h2 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+        }
+
+        .stage-status {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .stage-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stage-badge.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .stage-badge.completed {
+            background: var(--stage-complete);
+            color: white;
+        }
+
+        .stage-badge.locked {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .collapse-icon {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .stage-header.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .stage-content {
+            padding: 2rem;
+            max-height: 10000px;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), padding 0.4s ease;
+        }
+
+        .stage-content.collapsed {
+            max-height: 0;
+            padding: 0 2rem;
+        }
+
+        .stage-content h3 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.3rem;
+            color: var(--accent-secondary);
+            margin: 2rem 0 1rem 0;
+            font-weight: 600;
+        }
+
+        .stage-content h4 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin: 1.5rem 0 0.75rem 0;
+            font-weight: 600;
+        }
+
+        .stage-content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        .stage-content ul, .stage-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .stage-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .stage-content strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .code-block-wrapper {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        .code-block-wrapper.timed-reveal {
+            border: 2px solid var(--reveal-timer);
+            border-radius: 12px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .reveal-timer {
+            background: var(--reveal-timer);
+            color: var(--bg-primary);
+            padding: 0.75rem 1.5rem;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timer-countdown {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+        }
+
+        .reveal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(10, 14, 22, 0.95), rgba(20, 25, 34, 0.95));
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 8px;
+        }
+
+        .reveal-message {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 0 2rem;
+        }
+
+        .reveal-countdown {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            color: var(--accent-secondary);
+            font-weight: 700;
+        }
+
+        .skip-reveal-btn {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 2px solid var(--accent-primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .skip-reveal-btn:hover {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .partial-code {
+            position: relative;
+        }
+
+        .partial-hidden {
+            filter: blur(8px);
+            user-select: none;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .partial-visible {
+            opacity: 1;
+        }
+
+        .fill-in-prompt {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--reveal-timer);
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-family: 'Work Sans', sans-serif;
+            color: var(--text-primary);
+        }
+
+        .fill-in-prompt strong {
+            color: var(--reveal-timer);
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        pre {
+            background: var(--code-bg) !important;
+            border-radius: 8px;
+            padding: 1.5rem !important;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin: 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .inline-code {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9em;
+        }
+
+        .checkpoint {
+            background: linear-gradient(135deg, rgba(74, 242, 161, 0.1), rgba(45, 212, 191, 0.1));
+            border-left: 4px solid var(--accent-primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+
+        .checkpoint::before {
+            content: "✓ CHECKPOINT";
+            display: block;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.05em;
+        }
+
+        .complete-stage-btn {
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            color: var(--bg-primary);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 2rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .complete-stage-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(74, 242, 161, 0.3);
+        }
+
+        .complete-stage-btn:disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+            padding: 3rem 4rem;
+            border-radius: 24px;
+            border: 3px solid var(--accent-primary);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            text-align: center;
+            animation: celebrationPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes celebrationPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .celebration h3 {
+            font-family: 'Work Sans', sans-serif;
+            font-size: 2.5rem;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+        }
+
+        .celebration p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-primary);
+            position: absolute;
+            animation: confettiFall 3s linear forwards;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 22, 0.8);
+            z-index: 999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        blockquote {
+            border-left: 4px solid var(--accent-secondary);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid var(--border-color);
+            margin: 3rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .stage-content {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .celebration {
+                padding: 2rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Interactive Lesson Plan</h1>
+        <div class="lesson-selector">
+            <label for="lesson-select">Select Lesson:</label>
+            <select id="lesson-select">
+                <option value="">Choose a lesson...</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-label" id="progress-label">0 of 0 stages completed</div>
+        </div>
+
+        <div id="lesson-content"></div>
+    </div>
+
+    <script>
+     // Configuration for available lessons
+     const LESSONS = [
+       {
+         name: 'Projectile Simulator',
+         file: 'lesson-projectile-simulator.md'
+       }
+       // Add more lessons here as { name: 'Lesson Name', file: 'filename.md' }
+     ];
+
+     // Code blocks that should have timed reveals (for student practice)
+     const TIMED_REVEAL_PATTERNS = [
+       /import\s+numpy/i,  // Initial imports
+       /def\s+calculate_trajectory/i,  // Function definitions
+       /def\s+calculate_trajectory_with_drag/i,
+       /for\s+angle\s+in\s+range/i,  // Optimization loop
+       /from\s+ipywidgets/i,  // Interactive widgets
+     ];
+
+     const REVEAL_DELAY = 120; // seconds
+     const PARTIAL_REVEAL_MARKER = '<!-- PARTIAL_REVEAL -->';
+
+     class LessonViewer {
+       constructor() {
+         this.stages = [];
+         this.currentStage = 0;
+         this.completedStages = new Set();
+         this.timedReveals = new Map();
+         this.init();
+       }
+
+       init() {
+         this.populateLessonSelector();
+         this.loadProgress();
+         document.getElementById('lesson-select').addEventListener('change', (e) => {
+           if (e.target.value) {
+             this.loadLesson(e.target.value);
+           }
+         });
+       }
+
+       populateLessonSelector() {
+         const select = document.getElementById('lesson-select');
+         LESSONS.forEach(lesson => {
+           const option = document.createElement('option');
+           option.value = lesson.file;
+           option.textContent = lesson.name;
+           select.appendChild(option);
+         });
+
+         // Auto-load first lesson if available
+         if (LESSONS.length > 0) {
+           select.value = LESSONS[0].file;
+           this.loadLesson(LESSONS[0].file);
+         }
+       }
+
+       async loadLesson(filename) {
+         try {
+           const response = await fetch(filename);
+           if (!response.ok) throw new Error('Failed to load lesson');
+           const markdown = await response.text();
+           this.parseAndRender(markdown);
+         } catch (error) {
+           console.error('Error loading lesson:', error);
+           document.getElementById('lesson-content').innerHTML = 
+             '<p style="color: var(--reveal-timer); text-align: center; padding: 2rem;">Failed to load lesson. Make sure the markdown file is in the same directory.</p>';
+         }
+       }
+
+       parseAndRender(markdown) {
+         // Split into stages based on ## Stage headings
+         const stageRegex = /##\s+\*\*Stage\s+(\d+):[^*]+\*\*/gi;
+         const matches = [...markdown.matchAll(stageRegex)];
+         
+         this.stages = [];
+         
+         for (let i = 0; i < matches.length; i++) {
+           const start = matches[i].index;
+           const end = i < matches.length - 1 ? matches[i + 1].index : markdown.length;
+           const stageContent = markdown.substring(start, end);
+           this.stages.push(stageContent);
+         }
+
+         // If no stages found, treat whole document as one stage
+         if (this.stages.length === 0) {
+           this.stages.push(markdown);
+         }
+
+         this.renderStages();
+         this.updateProgress();
+       }
+
+       renderStages() {
+         const container = document.getElementById('lesson-content');
+         container.innerHTML = '';
+
+         this.stages.forEach((stageMarkdown, index) => {
+           const stageEl = this.createStageElement(stageMarkdown, index);
+           container.appendChild(stageEl);
+         });
+       }
+
+       createStageElement(markdown, index) {
+         const stage = document.createElement('div');
+         stage.className = 'stage';
+         stage.id = `stage-${index}`;
+
+         // Determine stage status
+         const isCompleted = this.completedStages.has(index);
+         const isActive = index === this.currentStage;
+         const isLocked = index > this.currentStage;
+
+         if (isCompleted) stage.classList.add('completed');
+         if (isLocked) stage.classList.add('locked');
+
+         // Extract title
+         const titleMatch = markdown.match(/##\s+\*\*Stage\s+\d+:\s*([^*]+)\*\*/i) || 
+                            markdown.match(/##\s+([^\n]+)/);
+         const title = titleMatch ? titleMatch[1].trim() : `Stage ${index + 1}`;
+
+         // Header
+         const header = document.createElement('div');
+         header.className = 'stage-header';
+         if (isCompleted) header.classList.add('collapsed');
+         
+         header.innerHTML = `
+           <h2>${title}</h2>
+           <div class="stage-status">
+             <span class="stage-badge ${isCompleted ? 'completed' : isActive ? 'active' : 'locked'}">
+               ${isCompleted ? 'Completed' : isActive ? 'Active' : 'Locked'}
+             </span>
+             <svg class="collapse-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <polyline points="6 9 12 15 18 9"></polyline>
+             </svg>
+           </div>
+         `;
+
+         // Content
+         const content = document.createElement('div');
+         content.className = 'stage-content';
+         if (isCompleted) content.classList.add('collapsed');
+
+         // Process markdown
+         let html = marked.parse(markdown);
+         
+         // Wrap code blocks and check for timed reveals
+         html = this.processCodeBlocks(html, index);
+         
+         // Style inline code
+         html = html.replace(/<code>([^<]+)<\/code>/g, '<code class="inline-code">$1</code>');
+         
+         // Style checkpoints
+         html = html.replace(/<p><strong>Checkpoint[^:]*:<\/strong>/gi, '<div class="checkpoint"><p><strong>Checkpoint:</strong>');
+         html = html.replace(/(<div class="checkpoint">[\s\S]*?)<\/p>/i, '$1</p></div>');
+
+         content.innerHTML = html;
+
+         // Add completion button if active stage
+         if (isActive && !isCompleted) {
+           const completeBtn = document.createElement('button');
+           completeBtn.className = 'complete-stage-btn';
+           completeBtn.textContent = 'Complete This Stage';
+           completeBtn.onclick = () => this.completeStage(index);
+           content.appendChild(completeBtn);
+         }
+
+         // Toggle collapse
+         header.onclick = () => {
+           if (isCompleted || isActive) {
+             header.classList.toggle('collapsed');
+             content.classList.toggle('collapsed');
+           }
+         };
+
+         stage.appendChild(header);
+         stage.appendChild(content);
+
+         // Apply syntax highlighting
+         setTimeout(() => {
+           stage.querySelectorAll('pre code').forEach(block => {
+             hljs.highlightElement(block);
+           });
+         }, 0);
+
+         return stage;
+       }
+
+       processCodeBlocks(html, stageIndex) {
+         let blockCounter = 0;
+         return html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, attrs, code) => {
+           blockCounter++;
+           
+           // Check for partial reveal marker
+           const hasPartialReveal = code.includes('<!-- PARTIAL_REVEAL -->');
+           
+           if (hasPartialReveal) {
+             // Split code at marker
+             const parts = code.split('<!-- PARTIAL_REVEAL -->');
+             const visiblePart = parts[0];
+             const hiddenPart = parts[1] || '';
+             
+             const revealId = `reveal-${stageIndex}-${blockCounter}`;
+             this.initTimedReveal(revealId, REVEAL_DELAY, true);
+             
+             return `
+                            <div class="fill-in-prompt">
+                                <strong>✏️ Try It Yourself</strong>
+                                Fill in the missing values before the solution reveals!
+                            </div>
+                            <div class="code-block-wrapper timed-reveal partial-code" id="${revealId}">
+                                <div class="reveal-overlay">
+                                    <div class="reveal-message">
+                                        💡 Fill in the missing code yourself!
+                                    </div>
+                                    <div class="reveal-countdown"></div>
+                                    <button class="skip-reveal-btn" onclick="window.lessonViewer.skipReveal('${revealId}')">
+                                        Skip Timer (I'm Done!)
+                                    </button>
+                                </div>
+                                <pre><code${attrs}><span class="partial-visible">${visiblePart}</span><span class="partial-hidden" data-reveal-content="${this.escapeHtml(hiddenPart)}">${hiddenPart}</span></code></pre>
+                            </div>
+             `;
+           }
+           
+           // Standard timed reveal
+           const shouldReveal = TIMED_REVEAL_PATTERNS.some(pattern => 
+             pattern.test(code)
+           );
+
+           if (shouldReveal) {
+             const revealId = `reveal-${stageIndex}-${blockCounter}`;
+             this.initTimedReveal(revealId, REVEAL_DELAY, false);
+             
+             return `
+                            <div class="code-block-wrapper timed-reveal" id="${revealId}">
+                                <div class="reveal-overlay">
+                                    <div class="reveal-message">
+                                        💡 Try implementing this yourself first!
+                                    </div>
+                                    <div class="reveal-countdown"></div>
+                                    <button class="skip-reveal-btn" onclick="window.lessonViewer.skipReveal('${revealId}')">
+                                        Skip Timer (Show Solution)
+                                    </button>
+                                </div>
+                                <pre><code${attrs}>${code}</code></pre>
+                            </div>
+             `;
+           }
+
+           return match;
+         });
+       }
+
+       escapeHtml(text) {
+         const div = document.createElement('div');
+         div.textContent = text;
+         return div.innerHTML;
+       }
+
+       initTimedReveal(revealId, delay, isPartial) {
+         this.timedReveals.set(revealId, {
+           remaining: delay,
+           interval: null,
+           isPartial: isPartial
+         });
+
+         setTimeout(() => {
+           const element = document.getElementById(revealId);
+           if (!element) return;
+
+           const timerData = this.timedReveals.get(revealId);
+           const countdown = element.querySelector('.reveal-countdown');
+           
+           const updateTimer = () => {
+             const mins = Math.floor(timerData.remaining / 60);
+             const secs = timerData.remaining % 60;
+             countdown.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+             
+             timerData.remaining--;
+             
+             if (timerData.remaining < 0) {
+               clearInterval(timerData.interval);
+               this.revealCode(revealId);
+             }
+           };
+
+           updateTimer();
+           timerData.interval = setInterval(updateTimer, 1000);
+         }, 100);
+       }
+
+       skipReveal(revealId) {
+         const timerData = this.timedReveals.get(revealId);
+         if (timerData && timerData.interval) {
+           clearInterval(timerData.interval);
+           this.revealCode(revealId);
+         }
+       }
+
+       revealCode(revealId) {
+         const element = document.getElementById(revealId);
+         if (!element) return;
+
+         const timerData = this.timedReveals.get(revealId);
+         const overlay = element.querySelector('.reveal-overlay');
+         
+         if (timerData && timerData.isPartial) {
+           // Partial reveal - unblur the hidden part
+           const hiddenSpan = element.querySelector('.partial-hidden');
+           if (hiddenSpan) {
+             hiddenSpan.classList.remove('partial-hidden');
+             hiddenSpan.classList.add('partial-visible');
+           }
+         }
+         
+         // Fade out overlay
+         overlay.style.animation = 'fadeOut 0.5s ease';
+         setTimeout(() => {
+           overlay.remove();
+           element.classList.remove('timed-reveal');
+           
+           // Re-apply syntax highlighting
+           element.querySelectorAll('pre code').forEach(block => {
+             hljs.highlightElement(block);
+           });
+         }, 500);
+       }
+
+       completeStage(index) {
+         this.completedStages.add(index);
+         this.currentStage = Math.min(index + 1, this.stages.length - 1);
+         this.saveProgress();
+         this.showCelebration(index);
+         
+         setTimeout(() => {
+           this.renderStages();
+           this.updateProgress();
+           
+           // Scroll to next stage
+           if (index + 1 < this.stages.length) {
+             document.getElementById(`stage-${index + 1}`).scrollIntoView({
+               behavior: 'smooth',
+               block: 'start'
+             });
+           }
+         }, 2000);
+       }
+
+       showCelebration(stageIndex) {
+         const overlay = document.createElement('div');
+         overlay.className = 'overlay';
+         
+         const celebration = document.createElement('div');
+         celebration.className = 'celebration';
+         celebration.innerHTML = `
+           <h3>🎉 Stage ${stageIndex + 1} Complete!</h3>
+           <p>Great work! Keep going!</p>
+         `;
+
+         document.body.appendChild(overlay);
+         document.body.appendChild(celebration);
+
+         // Confetti
+         for (let i = 0; i < 50; i++) {
+           setTimeout(() => {
+             const confetti = document.createElement('div');
+             confetti.className = 'confetti';
+             confetti.style.left = Math.random() * 100 + 'vw';
+             confetti.style.background = ['#4af2a1', '#2dd4bf', '#f59e0b'][Math.floor(Math.random() * 3)];
+             confetti.style.animationDelay = Math.random() * 0.5 + 's';
+             document.body.appendChild(confetti);
+             setTimeout(() => confetti.remove(), 3000);
+           }, i * 20);
+         }
+
+         setTimeout(() => {
+           overlay.remove();
+           celebration.remove();
+         }, 2000);
+       }
+
+       updateProgress() {
+         const completed = this.completedStages.size;
+         const total = this.stages.length;
+         const percentage = (completed / total) * 100;
+
+         document.getElementById('progress-fill').style.width = percentage + '%';
+         document.getElementById('progress-label').textContent = 
+           `${completed} of ${total} stages completed (${Math.round(percentage)}%)`;
+       }
+
+       saveProgress() {
+         localStorage.setItem('lessonProgress', JSON.stringify({
+           currentStage: this.currentStage,
+           completedStages: Array.from(this.completedStages)
+         }));
+       }
+
+       loadProgress() {
+         const saved = localStorage.getItem('lessonProgress');
+         if (saved) {
+           const data = JSON.parse(saved);
+           this.currentStage = data.currentStage || 0;
+           this.completedStages = new Set(data.completedStages || []);
+         }
+       }
+     }
+
+     // Add fadeOut animation
+     const style = document.createElement('style');
+     style.textContent = `
+            @keyframes fadeOut {
+                to { opacity: 0; }
+            }
+     `;
+     document.head.appendChild(style);
+
+     // Initialize when DOM is ready
+     window.lessonViewer = new LessonViewer();
+    </script>
+</body>
+</html>
