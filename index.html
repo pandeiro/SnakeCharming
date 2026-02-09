@@ -444,7 +444,65 @@
             display: none;
         }
 
+        /* Code block copy button toolbar */
+        .code-block-wrapper {
+            position: relative;
+            margin: 1.5rem 0;
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            margin-top: -1px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .code-block-wrapper:hover .code-toolbar {
+            opacity: 1;
+        }
+
+        .copy-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .copy-btn.copied {
+            background: var(--stage-complete);
+            border-color: var(--stage-complete);
+            color: white;
+        }
+
+        .copy-icon {
+            width: 14px;
+            height: 14px;
+        }
+
         pre {
+            border-radius: 8px 8px 0 0;
+        }
             background: var(--code-bg) !important;
             border-radius: 8px;
             padding: 1.5rem !important;

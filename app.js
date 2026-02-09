@@ -228,6 +228,7 @@ class LessonViewer {
     
     return html.replace(/<pre><code([^>]*)>([\s\S]*?)<\/code><\/pre>/g, (match, attrs, code) => {
       blockCounter++;
+      const blockId = `code-${stageIndex}-${blockCounter}`;
       
       // Check for both raw and HTML-encoded versions of the marker
       const rawMarker = PARTIAL_REVEAL_MARKER;
@@ -236,6 +237,19 @@ class LessonViewer {
       const hasRawMarker = code.includes(rawMarker);
       const hasEncodedMarker = code.includes(encodedMarker);
       const hasPartialReveal = hasRawMarker || hasEncodedMarker;
+      
+      // Copy button HTML
+      const copyBtnHtml = `
+        <div class="code-toolbar">
+          <button class="copy-btn" onclick="window.lessonViewer.copyCodeBlock('${blockId}')" title="Copy to clipboard">
+            <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span class="copy-text">Copy</span>
+          </button>
+        </div>
+      `;
       
       if (hasPartialReveal) {
         // Use whichever marker is present
@@ -265,7 +279,7 @@ class LessonViewer {
         // If already revealed, show only the solution (hidden part)
         if (isAlreadyRevealed) {
           return `
-            <div class="code-block-wrapper partial-reveal-wrapper revealed" data-reveal-id="${revealId}">
+            <div class="code-block-wrapper partial-reveal-wrapper revealed" data-reveal-id="${revealId}" id="${blockId}">
               <div class="partial-reveal-header">
                 <span class="partial-reveal-label">Solution</span>
                 <button class="reveal-btn revealed" disabled>
@@ -276,13 +290,14 @@ class LessonViewer {
                 </button>
               </div>
               <pre><code${attrs}>${hiddenPart}</code></pre>
+              ${copyBtnHtml}
             </div>
           `;
         }
         
         // Show partial content with reveal button
         return `
-          <div class="code-block-wrapper partial-reveal-wrapper" data-reveal-id="${revealId}">
+          <div class="code-block-wrapper partial-reveal-wrapper" data-reveal-id="${revealId}" id="${blockId}">
             <div class="partial-reveal-header">
               <span class="partial-reveal-label">Fill in the blanks</span>
               <button class="reveal-btn" id="reveal-btn-${revealId}" onclick="window.lessonViewer.handleRevealClick('${revealId}')" disabled>
@@ -295,11 +310,18 @@ class LessonViewer {
             </div>
             <pre><code${attrs}>${visiblePart}</code></pre>
             <div class="hidden-code" style="display: none;">${hiddenPart}</div>
+            ${copyBtnHtml}
           </div>
         `;
       }
 
-      return match;
+      // Regular code block - wrap with copy toolbar
+      return `
+        <div class="code-block-wrapper" id="${blockId}">
+          <pre><code${attrs}>${code}</code></pre>
+          ${copyBtnHtml}
+        </div>
+      `;
     });
   }
 
@@ -433,6 +455,39 @@ class LessonViewer {
     
     // Process queue to start timer for next block
     this.processRevealQueue();
+  }
+
+  async copyCodeBlock(blockId) {
+    const wrapper = document.getElementById(blockId);
+    if (!wrapper) return;
+    
+    // Get the code element - for partial reveal blocks, it's in the pre tag
+    const codeElement = wrapper.querySelector('pre code');
+    if (!codeElement) return;
+    
+    // Get text content (decodes HTML entities)
+    const codeText = codeElement.textContent || codeElement.innerText;
+    
+    try {
+      await navigator.clipboard.writeText(codeText);
+      
+      // Show "Copied!" feedback
+      const copyBtn = wrapper.querySelector('.copy-btn');
+      const copyText = wrapper.querySelector('.copy-text');
+      
+      if (copyBtn && copyText) {
+        const originalText = copyText.textContent;
+        copyBtn.classList.add('copied');
+        copyText.textContent = 'Copied!';
+        
+        setTimeout(() => {
+          copyBtn.classList.remove('copied');
+          copyText.textContent = originalText;
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   }
 
   saveRevealedBlocks() {
