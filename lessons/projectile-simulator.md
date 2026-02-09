@@ -141,8 +141,18 @@ t = np.linspace(0, t_flight, 100)
 **Step 5: Calculate Position at Each Time Point**
 
 ```python
+# Fill in the kinematic equations:
+x = ???   # Horizontal position: distance = velocity × time
+y = ???   # Vertical position: kinematic equation (remember gravity!)
+<!-- PARTIAL_REVEAL -->
+# Fill in the kinematic equations:
 x = vx * t                    # Horizontal position: distance = velocity × time
 y = vy * t - 0.5 * g * t**2   # Vertical position: kinematic equation
+
+# **The physics explained:**
+# - **Horizontal motion:** Constant velocity (no air resistance) → x = v₀ₓ × t
+# - **Vertical motion:** Constant acceleration (gravity) → y = v₀ᵧ × t - ½gt²
+# - **Why 0.5?** The ½ comes from integrating acceleration twice to get position
 ```
 
 **The physics:** These are the kinematic equations you learned in physics class:
@@ -157,12 +167,32 @@ y = vy * t - 0.5 * g * t**2   # Vertical position: kinematic equation
 # Create the figure
 plt.figure(figsize=(8, 4))
 
-# These operations will all act on the figure we just created above
-plt.plot(x, y, linewidth=2, color='#4af2a1')
-plt.xlabel('Distance (m)', fontsize=12)
-plt.ylabel('Height (m)', fontsize=12)
+# Fill in the plotting commands:
+plt.???(x, y, linewidth=2, color='#4af2a1')   # Create line plots
+plt.???('Distance (m)', fontsize=12)          # How do we label the x-axis?
+plt.???('Height (m)', fontsize=12)            # How do we label the y-axis?
+plt.???('Projectile Trajectory (45°, 20 m/s)', fontsize=14, fontweight='bold')
+plt.???(True, alpha=0.3)                      # How do we add grid lines?
+plt.ylim(0, max(y)*1.1)                       # Set y-axis to start at ground level
+plt.tight_layout()
+plt.show()
+
+# **Plotting functions helper hints (these are not in order!):**
+# - `plt.ylim()`: Sets y-axis limits
+# - `plt.title()`: Adds plot title
+# - `plt.plot()`: Creates line plots (x vs y)
+# - `plt.grid()`: Toggles grid lines (True/False)
+# - `plt.xlabel()`/`plt.ylabel()`: Add axis labels
+<!-- PARTIAL_REVEAL -->
+# Create the figure
+plt.figure(figsize=(8, 4))
+
+# Fill in the plotting commands:
+plt.plot(x, y, linewidth=2, color='#4af2a1')   # Create line plots
+plt.xlabel('Distance (m)', fontsize=12)        # Label x-axis
+plt.ylabel('Height (m)', fontsize=12)          # Label y-axis
 plt.title('Projectile Trajectory (45°, 20 m/s)', fontsize=14, fontweight='bold')
-plt.grid(True, alpha=0.3)
+plt.grid(True, alpha=0.3)                      # Add semi-transparent grid
 plt.ylim(0, max(y)*1.1)  # Set y-axis to start at ground level
 plt.tight_layout()
 plt.show()
@@ -249,6 +279,7 @@ Try modifying the code to:
 ### **Step 1: Define the Trajectory Function**
 
 ```python
+# Study this and see if you understand every line
 def calculate_trajectory(v0, theta_deg):
     """
     Calculate projectile trajectory for given initial conditions.
@@ -307,6 +338,25 @@ print(f"Max height: {max(y1):.2f} m")
 ### **Step 3: Compare Multiple Trajectories**
 
 ```python
+# Calculate three different angles
+x1, y1, t1 = calculate_trajectory(20, 30)
+x2, y2, t2 = calculate_trajectory(20, 45)
+x3, y3, t3 = calculate_trajectory(20, 60)
+
+# Plot all three on same graph
+plt.figure(figsize=(10, 5))
+plt.plot(x1, y1, label='30°', linewidth=2)
+plt.plot(x2, y2, label='45°', linewidth=2)
+plt.plot(x3, y3, label='60°', linewidth=2)
+
+plt.???('Distance (m)', fontsize=12)  # axis?
+plt.???('Height (m)', fontsize=12)    # axis?
+plt.title('Trajectory Comparison (v₀ = 20 m/s)', fontsize=14, fontweight='bold')
+plt.legend(fontsize=11)
+plt.grid(True, alpha=0.3)
+plt.tight_layout()  # what does this one do? nobody knows!
+plt.???()           # show the plot!
+<!-- PARTIAL_REVEAL -->
 # Calculate three different angles
 x1, y1, t1 = calculate_trajectory(20, 30)
 x2, y2, t2 = calculate_trajectory(20, 45)
@@ -421,9 +471,25 @@ ranges = []
 ```python
 # Test every integer angle from 0 to 90 degrees
 for angle in range(0, 91):  # range(0, 91) gives 0, 1, 2, ..., 90
-    r = get_range(20, angle)
-    angles.append(angle)
-    ranges.append(r)
+    # Inside the loop: calculate range and store results
+    r = ???           # How do we get the range for current angle?
+    angles.???(angle) # How do we add to the angles list?
+    ranges.???(r)     # How do we add to the ranges list?
+    
+print(f"Tested {len(angles)} different angles")
+
+# **Loop mechanics explained:**
+# - `range(0, 91)`: Generates numbers 0 through 90 (inclusive of 0, exclusive of 91)
+# - `get_range(20, angle)`: Calls our helper function for each angle
+# - `.append()`: List method that adds items to the end
+# - Each iteration: angle → range → store both
+<!-- PARTIAL_REVEAL -->
+# Test every integer angle from 0 to 90 degrees
+for angle in range(0, 91):    # range(0, 91) gives 0, 1, 2, ..., 90
+    # Inside the loop: calculate range and store results
+    r = get_range(20, angle)  # Calculate range for current angle
+    angles.append(angle)      # Add angle to list
+    ranges.append(r)          # Add range to list
     
 print(f"Tested {len(angles)} different angles")
 ```
@@ -439,7 +505,20 @@ print(f"Tested {len(angles)} different angles")
 
 ```python
 # Find the angle that gives maximum range
-optimal_angle = angles[np.argmax(ranges)]  # Index of maximum value
+optimal_angle = ???  # How do we get the angle at the maximum range index?
+max_range = ???      # How do we get the maximum range value?
+
+print(f"Optimal angle: {optimal_angle}°")
+print(f"Maximum range: {max_range:.2f} m")
+
+# **Finding maximum explained:**
+# - `max(ranges)`: Returns the largest value in ranges list
+# - `np.argmax(ranges)`: Returns the INDEX of the largest value (0, 1, 2, ...)
+# - `angles[index]`: Accesses the angle at that index position
+# - Together: Find which angle corresponds to maximum range
+<!-- PARTIAL_REVEAL -->
+# Find the angle that gives maximum range
+optimal_angle = angles[np.argmax(ranges)]  # Index of maximum value in angles list
 max_range = max(ranges)  # The maximum range value
 
 print(f"Optimal angle: {optimal_angle}°")
@@ -636,24 +715,23 @@ def calculate_trajectory_with_drag(v0, theta_deg, k=0.1):
 
 ```python
 # Calculate both trajectories
-x_no_drag, y_no_drag, _ = calculate_trajectory(20, 45)
-x_drag, y_drag = calculate_trajectory_with_drag(20, 45, k=0.1)
+x_no_drag, y_no_drag, _ = ???(20, 45)  # Call the no-drag function
+x_drag, y_drag = ???(20, 45, k=0.1)    # Call the with-drag function
 
-# Plot comparison
-plt.figure(figsize=(10, 6))
-plt.plot(x_no_drag, y_no_drag, 'b--', linewidth=2, 
-         label='No air resistance', alpha=0.7)
-plt.plot(x_drag, y_drag, 'r-', linewidth=2.5, 
-         label='With air resistance (k=0.1)')
+# Print comparison
+print(f"Range without drag: {x_no_drag[-1]:.2f} m")
+print(f"Range with drag: {x_drag[-1]:.2f} m")
+print(f"Reduction: {(1 - x_drag[-1]/x_no_drag[-1])*100:.1f}%")
 
-plt.xlabel('Distance (m)', fontsize=12)
-plt.ylabel('Height (m)', fontsize=12)
-plt.title('Effect of Air Resistance on Trajectory', 
-          fontsize=14, fontweight='bold')
-plt.legend(fontsize=11)
-plt.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
+# **Comparison explained:**
+# - `calculate_trajectory()`: Our original function (no air resistance)
+# - `calculate_trajectory_with_drag()`: New function with drag parameter
+# - `x[-1]`: Last element of array = final x position = range
+# - Percentage reduction: Compares how much drag reduces the range
+<!-- PARTIAL_REVEAL -->
+# Calculate both trajectories
+x_no_drag, y_no_drag, _ = calculate_trajectory(20, 45)  # Original function
+x_drag, y_drag = calculate_trajectory_with_drag(20, 45, k=0.1)  # Drag function
 
 # Print comparison
 print(f"Range without drag: {x_no_drag[-1]:.2f} m")
