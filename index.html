@@ -119,8 +119,13 @@
      }
 
      .help-btn {
-       background: transparent;
-       border: none;
+       position: fixed;
+       top: 1.25rem;
+       right: 2rem;
+       z-index: 101;
+       background: rgba(30, 37, 50, 0.8);
+       backdrop-filter: blur(4px);
+       border: 1px solid var(--border-color);
        color: var(--text-secondary);
        cursor: pointer;
        padding: 0.5rem;
@@ -133,8 +138,13 @@
 
      .help-btn:hover {
        color: var(--accent-primary);
+       border-color: var(--accent-primary);
        background: rgba(74, 242, 161, 0.1);
-       transform: translateY(-1px);
+       transform: translateY(-1px) scale(1.05);
+     }
+
+     .header.shrunk ~ .help-btn {
+       top: 0.8rem;
      }
 
      .resources-overlay {
@@ -982,16 +992,17 @@
             <div class="progress-fill" id="progress-fill"></div>
           </div>
           <span class="progress-label" id="progress-label">0%</span>
-          <button class="help-btn" onclick="window.lessonViewer.toggleResources()" title="Additional Resources">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-          </button>
         </div>
       </div>
     </div>
+
+    <button class="help-btn" onclick="window.lessonViewer.toggleResources()" title="Additional Resources">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </button>
 
     <div class="container">
       <div id="lesson-content"></div>
