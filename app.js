@@ -8,7 +8,7 @@ const LESSONS = [
 ];
 
 // Only code blocks with <!-- PARTIAL_REVEAL --> marker get timed reveals
-const REVEAL_DELAY = 120; // 2 minutes in seconds
+const REVEAL_DELAY = 75; // 1.25 min in seconds
 const PARTIAL_REVEAL_MARKER = '<!-- PARTIAL_REVEAL -->';
 
 class LessonViewer {
