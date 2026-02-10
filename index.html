@@ -1008,8 +1008,8 @@
       <div id="lesson-content"></div>
     </div>
 
-    <div id="resources-overlay" class="resources-overlay hidden">
-      <div class="resources-modal">
+    <div id="resources-overlay" class="resources-overlay hidden" onclick="window.lessonViewer.toggleResources()">
+      <div class="resources-modal" onclick="event.stopPropagation()">
         <div class="resources-header">
           <h3>Additional Resources</h3>
           <button class="close-resources-btn" onclick="window.lessonViewer.toggleResources()">
