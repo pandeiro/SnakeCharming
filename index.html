@@ -455,7 +455,12 @@
        font-family: 'Work Sans', sans-serif;
        font-size: 1.5rem;
        font-weight: 700;
-       color: var(--accent-primary);
+       background: linear-gradient(135deg, var(--accent-primary) 0%, #6366f1 50%, teal 100%);
+       text-shadow: 2px 2px 5px rgba(255,255,255,0.2);
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       background-clip: text;
+       display: inline-block;
      }
 
      .stage-status {
