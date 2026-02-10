@@ -39,6 +39,18 @@ class LessonViewer {
       }
     });
     this.setupIntersectionObserver();
+    this.setupScrollListener();
+  }
+
+  setupScrollListener() {
+    const header = document.getElementById('main-header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('shrunk');
+      } else {
+        header.classList.remove('shrunk');
+      }
+    });
   }
 
   setupIntersectionObserver() {
@@ -571,11 +583,10 @@ class LessonViewer {
   updateProgress() {
     const completed = this.completedStages.size;
     const total = this.stages.length;
-    const percentage = (completed / total) * 100;
+    const percentage = total > 0 ? (completed / total) * 100 : 0;
 
     document.getElementById('progress-fill').style.width = percentage + '%';
-    document.getElementById('progress-label').textContent = 
-      `${completed} of ${total} stages completed (${Math.round(percentage)}%)`;
+    document.getElementById('progress-label').textContent = `${Math.round(percentage)}%`;
   }
 
   saveProgress() {
