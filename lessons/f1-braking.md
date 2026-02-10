@@ -4,21 +4,13 @@
 
 **Objective:** Build a Python program that models F1 car braking dynamics under traction limits and finds the optimal braking point for corner entry. This project teaches you how mechanical engineers analyze vehicle dynamics, tire grip limits, and race strategy—skills applicable to autonomous vehicle control, motorsports engineering, or any system with friction-limited motion.
 
-**Why This Project?**
-1. **New Physics Context:** Applies Newton's 2nd law to real-world traction limits (friction circles)
-2. **Performance Engineering:** Introduces the "how late can you brake?" optimization problem that F1 engineers solve
-3. **Tangible Results:** Creates visualizations showing braking zones and lap time improvements
-4. **Career Relevance:** Teaches vehicle dynamics, deceleration analysis, and performance optimization—core skills in automotive and racing engineering
-
-**Prerequisites:** High school algebra and physics (Newton's laws, friction). Completion of projectile simulator project helpful but not required.
-
 **Tools:** Google Colab (colab.research.google.com)
 
-**Estimated Time:** 8-12 hours total (can be spread over multiple sessions)
+**Estimated Time:** 3-6 hours total (can be spread over multiple sessions)
 
 ---
 
-## **Pedagogical Objectives**
+## **Objectives**
 
 By completing this project, you will learn to:
 1. **Apply** Newton's 2nd law in a friction-limited deceleration context
@@ -33,44 +25,22 @@ By completing this project, you will learn to:
 ## **Stage 1A: Understanding F1 Braking Physics**
 
 ### **Learning Focus: Core Deceleration Concepts**
-*Core Skills: Variables, basic math operations, unit conversions, Newton's 2nd law application*
 
 **Time Estimate:** 1-1.5 hours
 
 **What You'll Build:** A simple calculator that computes how long it takes an F1 car to stop from a given speed.
 
 **Assignment:**
-1. Create a new Colab notebook titled "F1_Braking_Simulator"
+1. Create a new Colab notebook titled `F1_Braking_Simulator`
 2. Calculate stopping time and distance for an F1 car braking from 200 km/h
-
----
-
-### **The Physics Behind F1 Braking**
-
-**Key Concept: Friction Circle**
-
-In racing, tires have a maximum grip limit. Think of it as a "friction circle"—the tire can only generate so much total force before it starts to slip. For pure braking (no cornering), all that grip goes into slowing the car.
-
-**The relationship:**
-- **Maximum braking force:** F_max = μ × m × g
-  - μ (mu) = coefficient of friction (tire grip)
-  - m = mass of the car
-  - g = gravitational acceleration (9.81 m/s²)
-
-- **Maximum deceleration:** a_max = F_max / m = μ × g
-  - **Notice: mass cancels out!** Deceleration depends only on tire grip, not car weight
-  - This is why we can define mass but won't actually need it in calculations
-
-**F1 tire grip values:**
-- Modern F1 slick tires: μ ≈ 1.8-2.2 (in optimal conditions)
-- For comparison, road car tires: μ ≈ 0.7-0.9
-- This means F1 cars can pull almost 2g of deceleration!
 
 ---
 
 ### **Step-by-Step Instructions:**
 
-**Step 1: Import Required Libraries**
+**Step 1A: Import Required Libraries**
+
+It's our old friends numpy and matplot!
 
 ```python
 import numpy as np
@@ -81,11 +51,28 @@ import matplotlib.pyplot as plt
 - `numpy` provides mathematical functions and arrays
 - `matplotlib.pyplot` creates plots and visualizations
 
+**Step 1B: Define Colors**
+- `COLORS` dictionary will ensure all our plots use consistent color coding (like a pro F1 engineering team would)
+
+```python
+# F1 Data Visualization Color Palette
+# We'll reference these colors consistently throughout for professional-looking plots
+COLORS = {
+    'f1_red': '#E10600',          # Dry conditions / optimal performance
+    'wet_blue': '#0066CC',        # Wet conditions
+    'rain_green': '#00CC66',      # Very wet / heavy rain conditions
+    'damp_orange': '#FF9900',     # Damp / intermediate conditions
+    'reference_black': '#1A1A1A'  # Reference lines and baselines
+}
+```
+
+**Pro tip:** Using a color palette makes your data instantly recognizable. When you see F1 red, you'll know it's dry/optimal. Blue always means wet. This is standard practice in engineering visualization.
+
 ---
 
 **Step 2: Define Physical Constants**
 
-Let's start simple—just the constants we need:
+Let's start with the fundamental constants:
 
 ```python
 # Physical constants
@@ -103,7 +90,31 @@ mu = 2.0   # coefficient of friction - modern F1 slick tires
 # We'll use 2.0 as a typical "good conditions" value
 ```
 
-**Key Concept:** The coefficient of friction (μ) determines how much grip the tires have. Higher μ = better grip = shorter stopping distance.
+---
+
+### **⚠️ IMPORTANT PHYSICS NOTE: Why μ > 1 for F1 Tires**
+
+**You might be thinking:** "Wait, I learned in physics class that friction coefficients are always less than 1!"
+
+**That's true for simple materials** (like wood on wood, or a book on a table), but **F1 tires are special**:
+
+**Three reasons F1 tires can exceed μ = 1:**
+
+1. **Soft rubber compounds:** F1 tire rubber is so soft it almost "sticks" to the track surface chemically, not just through mechanical friction. The rubber literally bonds to the asphalt at a molecular level.
+
+2. **Tire deformation:** When an F1 tire loads up under braking, it deforms and creates a contact patch that mechanically interlocks with the track surface texture—creating grip beyond simple friction.
+
+3. **Aerodynamic downforce:** F1 cars generate massive downforce (up to 5× the car's weight at high speed!), which increases the normal force pressing the tire into the track. More normal force = more grip available.
+
+**The result:** Modern F1 slicks can generate μ = 1.8-2.2 in optimal conditions—that's nearly **2g of deceleration!** This is why F1 cars can brake from 200 km/h to a near-stop in less than 80 meters, while a road car would need 200+ meters.
+
+**For comparison:**
+- Road car tires: μ ≈ 0.7-0.9
+- Racing slicks (optimal): μ ≈ 1.8-2.2
+- F1 in the wet: μ ≈ 1.0-1.4
+- Road car in the wet: μ ≈ 0.4-0.6
+
+So when you see μ = 2.0 in this project, that's not an error—that's the incredible reality of F1 tire technology!
 
 ---
 
@@ -115,7 +126,7 @@ Now define the speed we're braking from:
 # Initial speed - fill in the value:
 v0_kmh = ???  # km/h - try a typical corner approach speed (150-250 km/h)
 <!-- PARTIAL_REVEAL -->
-# Complete solution:
+# Our recommendation (but this can be changed!):
 v0_kmh = 200  # km/h - approaching a medium-speed corner
 
 # **Why 200 km/h?**
@@ -133,7 +144,7 @@ Physics works in m/s, not km/h, so we need to convert:
 
 ```python
 # Convert km/h to m/s - fill in the conversion:
-v0 = v0_kmh / ???  # Hint: divide by 3.6
+v0 = v0_kmh / ???
 <!-- PARTIAL_REVEAL -->
 # Complete solution:
 v0 = v0_kmh / 3.6  # Convert: 200 km/h = 55.56 m/s
@@ -147,7 +158,7 @@ Now calculate the maximum deceleration:
 
 ```python
 # Fill in the deceleration formula:
-a_max = ??? * ???  # Maximum deceleration = mu × g
+a_max = ???  # Maximum deceleration formula?
 <!-- PARTIAL_REVEAL -->
 # Complete solution:
 a_max = mu * g     # Maximum deceleration = 2.0 × 9.81 = 19.62 m/s²
@@ -160,7 +171,7 @@ a_max = mu * g     # Maximum deceleration = 2.0 × 9.81 = 19.62 m/s²
 # (assuming same tires and conditions)
 ```
 
-**Engineering Insight:** The fact that deceleration is independent of mass is counterintuitive but true! A heavy car and light car stop in the same distance with the same tires. However, the heavy car's brakes work harder (more energy to dissipate).
+**Engineering Insight:** The fact that deceleration is independent of mass is counterintuitive but true! A heavy car and light car stop in the same distance with the same tires. However, the heavy car's brakes work harder (more kinetic energy to dissipate as heat).
 
 ---
 
@@ -172,13 +183,14 @@ Use the kinematic equation v = v₀ - at. When the car stops, v = 0:
 # Fill in the stopping time formula:
 # Starting from: v = v0 - a*t
 # When stopped: 0 = v0 - a*t
+
 # Solve for t: t = ???
 t_stop = ??? / ???
 <!-- PARTIAL_REVEAL -->
-# Complete solution:
+# Solve for t: t = ???
 t_stop = v0 / a_max  # Time to stop: t = v0 / a
 
-# **The algebra:**
+# **The algebra, explained:**
 # v = v0 - at
 # At stop: 0 = v0 - a*t
 # Rearrange: a*t = v0
@@ -195,10 +207,11 @@ Use the kinematic equation v² = v₀² - 2ad. When the car stops, v = 0:
 # Fill in the stopping distance formula:
 # Starting from: v² = v0² - 2*a*d
 # When stopped: 0 = v0² - 2*a*d
+
 # Solve for d: d = ???
-d_stop = ???**2 / (2 * ???)
+d_stop = ???**2 / (2 * ???)   # ** in python is the exponent operand btw
 <!-- PARTIAL_REVEAL -->
-# Complete solution:
+# Solve for d: d = ???
 d_stop = v0**2 / (2 * a_max)  # Distance to stop: d = v0² / (2a)
 
 # **The algebra:**
@@ -215,6 +228,11 @@ d_stop = v0**2 / (2 * a_max)  # Distance to stop: d = v0² / (2a)
 ---
 
 **Step 7: Display Results**
+
+Here we go, the fun part:
+
+(Note: if you want to change your initial speed, go back and do that and run all cells again,
+and this will all change.)
 
 ```python
 # Print the results
@@ -291,7 +309,7 @@ We'll use numpy to create an array of time points from 0 to t_stop:
 t = np.linspace(0, t_stop, 100)
 ```
 
-**What this does:** `linspace` creates 100 evenly-spaced values between 0 and t_stop. This gives us smooth curves when plotting.
+**What this does:** our old friend `linspace` creates 100 evenly-spaced values between 0 and t_stop. This gives us smooth curves when plotting.
 
 ---
 
@@ -319,39 +337,41 @@ Now let's visualize it! Fill in the plotting functions:
 plt.figure(figsize=(10, 5))
 
 # Fill in the plotting commands (use the hints below):
-plt.???(t, v * 3.6, linewidth=2, color='#e10600')  # Hint: creates line plot
-plt.???('Time (s)', fontsize=12)                    # Hint: labels x-axis
-plt.???('Velocity (km/h)', fontsize=12)             # Hint: labels y-axis
+plt.???(t, v * 3.6, linewidth=2, color=COLORS['f1_red'])                 # Hint: creates line plot
+plt.???('Time (s)', fontsize=12)                                         # Hint: labels x-axis
+plt.???('Velocity (km/h)', fontsize=12)                                  # Hint: labels y-axis
 plt.???('F1 Braking: Velocity vs Time', fontsize=14, fontweight='bold')  # Hint: adds title
-plt.???(True, alpha=0.3)                            # Hint: adds grid lines
+plt.???(True, alpha=0.3)                                                 # Hint: adds grid lines
 
-plt.axhline(y=0, color='black', linestyle='--', alpha=0.5)  # Ground reference
+plt.axhline(y=0, color=COLORS['reference_black'], linestyle='--', alpha=0.5)  # Ground reference
 plt.tight_layout()
 plt.show()
 <!-- PARTIAL_REVEAL -->
 # Complete solution:
 plt.figure(figsize=(10, 5))
-plt.plot(t, v * 3.6, linewidth=2, color='#e10600')  # F1 red color, convert to km/h
+plt.plot(t, v * 3.6, linewidth=2, color=COLORS['f1_red'])  # F1 red for dry/optimal
 plt.xlabel('Time (s)', fontsize=12)
 plt.ylabel('Velocity (km/h)', fontsize=12)
 plt.title('F1 Braking: Velocity vs Time', fontsize=14, fontweight='bold')
 plt.grid(True, alpha=0.3)
-plt.axhline(y=0, color='black', linestyle='--', alpha=0.5)
+plt.axhline(y=0, color=COLORS['reference_black'], linestyle='--', alpha=0.5)
 plt.tight_layout()
 plt.show()
 ```
 
-**Plotting functions you used:**
+**Plotting functions you may remember from past lessons:**
 - `plt.plot()`: Creates line plots (x vs y)
 - `plt.xlabel()` / `plt.ylabel()`: Add axis labels
 - `plt.title()`: Adds plot title
 - `plt.grid()`: Toggles grid lines (True/False, alpha controls transparency)
 
+**Color note:** We used `COLORS['f1_red']` for dry/optimal braking. This consistent color coding will make all your plots professional and easy to read!
+
 ---
 
 ### **Checkpoint #2**
 
-**What you should see:** A straight line declining from 200 km/h to 0 over ~2.83 seconds.
+**What you should see:** A straight red line declining from 200 km/h to 0 over ~2.83 seconds.
 
 **Why is it straight?** Because deceleration is constant (maximum braking), velocity decreases linearly: v = v₀ - (constant)×t
 
@@ -388,6 +408,8 @@ print(f"Expected pattern: velocity should decrease linearly")
 
 ### **Extension Challenge (Optional)**
 
+If we want to really show off, let's do a little more math. Why not?
+
 **Add a "G-Force Meter" annotation:**
 ```python
 # Add text showing g-forces experienced
@@ -398,6 +420,8 @@ plt.text(0.7, 0.9, f'Driver feels: {a_max/g:.1f}g forward\n(~{a_max/g * 70:.0f} 
 ```
 
 This shows the physical force drivers experience during braking!
+
+**Question**: Does a heavier driver experience more or less G-force?
 
 ---
 
@@ -428,12 +452,12 @@ x_t = ??? * t - 0.5 * ??? * t**2
 <!-- PARTIAL_REVEAL -->
 # Complete solution:
 x_t = v0 * t - 0.5 * a_max * t**2  # Position increases as car moves forward
-
-# **Connection to projectiles:**
-# Same kinematic form: x = v0*t - 0.5*a*t²
-# But here 'a' is horizontal deceleration (slowing the car)
-# vs projectile where 'g' was vertical acceleration (pulling down)
 ```
+
+**Connection to projectiles:**
+- Same kinematic form: x = v0*t - 0.5*a*t²
+- But here 'a' is horizontal deceleration (slowing the car)
+- vs projectile where 'g' was vertical acceleration (pulling down)
 
 ---
 
@@ -452,7 +476,7 @@ Solving for v: v = √(v₀² - 2ad)
 x_array = np.linspace(0, d_stop, 100)
 
 # Fill in the velocity-distance formula:
-v_x = np.sqrt(???**2 - 2 * ??? * x_array)  # v(x) = sqrt(v0² - 2ax)
+v_x = np.sqrt(??? - 2 * ??? * x_array)  # v(x) = sqrt(v0² - 2ax)
 <!-- PARTIAL_REVEAL -->
 # Complete solution:
 x_array = np.linspace(0, d_stop, 100)
@@ -463,13 +487,13 @@ Now plot it:
 
 ```python
 plt.figure(figsize=(10, 6))
-plt.plot(x_array, v_x * 3.6, linewidth=3, color='#e10600', label='Velocity')
+plt.plot(x_array, v_x * 3.6, linewidth=3, color=COLORS['f1_red'], label='Velocity')
 plt.xlabel('Distance from Braking Point (m)', fontsize=12)
 plt.ylabel('Velocity (km/h)', fontsize=12)
 plt.title('F1 Braking Zone: Velocity vs Distance', fontsize=14, fontweight='bold')
 plt.grid(True, alpha=0.3)
 
-# Add reference lines
+# Add reference lines - this helps put things in context
 plt.axhline(y=v0_kmh, color='green', linestyle='--', alpha=0.5, 
             label=f'Entry: {v0_kmh} km/h')
 plt.axvline(x=d_stop, color='red', linestyle='--', alpha=0.5, 
@@ -555,18 +579,23 @@ def calculate_braking(v0_kmh, mu, label, color):
     return x_array, v_array, d_stop, t_stop
 ```
 
+**Rationale**: We don't want to have to write or even copy/paste all this math, every time we want this calculation. So make it a function!
+
 ---
 
 **Step 4: Compare Dry vs Wet Conditions**
 
-Now use the function to compare scenarios:
+Now use the function to compare scenarios with our consistent color palette:
+
+**AND**... We're going to introduce _looping_ for the first time, via Python's `for`. Check out
+a quick illustration of the concept here before starting: https://docs.python.org/3/tutorial/controlflow.html#for-statements
 
 ```python
-# Define scenarios to compare
+# Define scenarios to compare (using our color palette!)
 scenarios = [
-    (200, 2.0, 'Dry (μ=2.0)', '#e10600'),      # Standard F1 grip
-    (200, 1.2, 'Wet (μ=1.2)', '#0066cc'),      # Wet weather
-    (200, 0.8, 'Very Wet (μ=0.8)', '#00cc66')  # Heavy rain
+    (200, 2.0, 'Dry (μ=2.0)', COLORS['f1_red']),        # Dry conditions
+    (200, 1.2, 'Wet (μ=1.2)', COLORS['wet_blue']),      # Wet weather
+    (200, 0.8, 'Very Wet (μ=0.8)', COLORS['rain_green'])  # Heavy rain
 ]
 
 plt.figure(figsize=(12, 6))
@@ -585,11 +614,11 @@ plt.show()
 ```
 
 **What you should observe:**
-- Dry conditions (μ=2.0): ~78m stopping distance
-- Wet conditions (μ=1.2): ~131m (67% longer!)
-- Very wet (μ=0.8): ~196m (2.5× longer!)
+- Red (dry, μ=2.0): ~78m stopping distance
+- Blue (wet, μ=1.2): ~131m (67% longer!)
+- Green (very wet, μ=0.8): ~196m (2.5× longer!)
 
-**Real-world insight:** This is why F1 drivers brake MUCH earlier in the rain—tire grip drops dramatically.
+**Real-world insight:** This is why F1 drivers brake MUCH earlier in the rain—tire grip drops dramatically. Notice how the color coding makes this instantly clear!
 
 ---
 
@@ -598,7 +627,7 @@ plt.show()
 **Compare different entry speeds:**
 ```python
 speeds = [150, 200, 250, 300]  # Different corner types
-colors = ['#00cc66', '#e10600', '#ff9900', '#cc00cc']
+colors = [COLORS['rain_green'], COLORS['f1_red'], COLORS['damp_orange'], '#CC00CC']
 
 plt.figure(figsize=(12, 6))
 for speed, color in zip(speeds, colors):
@@ -646,6 +675,10 @@ From v² = v₁² - 2ad, solving for d: **d = (v₁² - v₂²) / (2a)**
 
 **Step 2: Create the Braking Distance Function**
 
+Copy this partially implemented function and see if you can figure out the missing values.
+
+**Pro-Tip**: Notice how Python functions use a block delimited by `"""` to document what they do, what params they take, and what kind of value they return. This is a great practice because it makes it easy to understand how to use the function without remembering or caring about all the implementation. It might be overkill for simple stuff, but it's a good habit to get into - it also helps you think about your implementation before you write it.
+
 ```python
 def braking_distance(v_entry_kmh, v_corner_kmh, mu):
     """
@@ -673,7 +706,6 @@ def braking_distance(v_entry_kmh, v_corner_kmh, mu):
     
     return distance, time
 <!-- PARTIAL_REVEAL -->
-# Complete solution:
 def braking_distance(v_entry_kmh, v_corner_kmh, mu):
     """
     Calculate minimum braking distance from entry speed to corner speed.
@@ -731,11 +763,11 @@ print("=" * 60)
 
 ### **Step 4: THE BATTLE - Lewis vs Max**
 
-Now let's simulate the late braking advantage:
+Now let's simulate the late braking advantage, featuring two hypothetical drivers named Lewis and Max.
 
 ```python
 print("\n" + "=" * 70)
-print("LATE BRAKING BATTLE: HAMILTON vs VERSTAPPEN")
+print("🏁 LATE BRAKING BATTLE 🏁")
 print("=" * 70)
 
 # Optimal braking point
@@ -748,22 +780,22 @@ lewis_brake_point = d_optimal + 10
 # He's already been braking for 10m
 v_lewis_at_optimal = np.sqrt((v_straight/3.6)**2 - 2 * (mu_dry * g) * 10) * 3.6
 
-print(f"\nLEWIS (conservative):")
+print(f"\n🏎️  LEWIS (conservative):")
 print(f"  Brakes at:        {lewis_brake_point:.1f}m mark")
 print(f"  Speed at optimal: {v_lewis_at_optimal:.1f} km/h")
 
-print(f"\nMAX (aggressive):")
+print(f"\n🏎️  MAX (aggressive):")
 print(f"  Brakes at:        {d_optimal:.1f}m mark")  
 print(f"  Speed at optimal: {v_straight} km/h")
 
 print(f"\n" + "=" * 70)
-print(f"MAX'S ADVANTAGE:")
+print(f"⚡ MAX'S ADVANTAGE:")
 print(f"  Speed difference: {v_straight - v_lewis_at_optimal:.1f} km/h")
 print(f"  Time advantage:   ~{10 / (v_straight/3.6):.3f} seconds")
 print(f"  Position gain:    ~{10:.1f} meters")
 print("=" * 70)
 
-print("\nINSIGHT: Braking just 10m later means carrying ~26 km/h more speed")
+print("\n💡 INSIGHT: Braking just 10m later means carrying ~26 km/h more speed")
 print("at the optimal point. That's the difference between P1 and P2!")
 ```
 
@@ -783,7 +815,7 @@ corners = {
 }
 
 print("\n" + "=" * 60)
-print("F1 CORNER BRAKING CHALLENGE")
+print("🏆 F1 CORNER BRAKING CHALLENGE 🏆")
 print("=" * 60)
 
 for corner_name, (v_in, v_out) in corners.items():
@@ -819,10 +851,10 @@ def plot_simple_braking_zone(v_straight, v_corner, mu):
     x = np.linspace(0, d, 200)
     v_x = np.sqrt(v1**2 - 2 * a_max * x) * 3.6
     
-    # Plot
+    # Plot (using our color palette!)
     plt.figure(figsize=(12, 5))
-    plt.plot(x, v_x, linewidth=3, color='#e10600')
-    plt.fill_between(x, 0, v_x, alpha=0.2, color='red', label='Braking zone')
+    plt.plot(x, v_x, linewidth=3, color=COLORS['f1_red'])
+    plt.fill_between(x, 0, v_x, alpha=0.2, color=COLORS['f1_red'], label='Braking zone')
     
     # Mark key points
     plt.axvline(x=0, color='green', linewidth=2, label='Braking point (latest)')
@@ -870,12 +902,12 @@ track_corners = {
     "Turn 12": (200, 60),   # Hairpin
 }
 
-# Weather conditions
+# Weather conditions (mapped to our color palette!)
 conditions = {
-    "Dry": 2.0,
-    "Damp": 1.5,
-    "Wet": 1.2,
-    "Very Wet": 0.8
+    "Dry": (2.0, COLORS['f1_red']),
+    "Damp": (1.5, COLORS['damp_orange']),
+    "Wet": (1.2, COLORS['wet_blue']),
+    "Very Wet": (0.8, COLORS['rain_green'])
 }
 ```
 
@@ -897,15 +929,15 @@ for corner_name, (v_in, v_out) in track_corners.items():
     dry_distances.append(d_dry)
     wet_distances.append(d_wet)
 
-# Create comparison bar chart
+# Create comparison bar chart (using our color palette!)
 x_pos = np.arange(len(corner_names))
 width = 0.35
 
 fig, ax = plt.subplots(figsize=(12, 6))
 bars1 = ax.bar(x_pos - width/2, dry_distances, width, 
-               label='Dry (μ=2.0)', color='#e10600', alpha=0.8)
+               label='Dry (μ=2.0)', color=COLORS['f1_red'], alpha=0.8)
 bars2 = ax.bar(x_pos + width/2, wet_distances, width, 
-               label='Wet (μ=1.2)', color='#0066cc', alpha=0.8)
+               label='Wet (μ=1.2)', color=COLORS['wet_blue'], alpha=0.8)
 
 # Add values on bars
 for bars in [bars1, bars2]:
@@ -936,7 +968,7 @@ for i, corner in enumerate(corner_names):
 print("=" * 60)
 ```
 
-**What you should see:** Every corner needs ~65-67% more distance in wet conditions. Heavy braking zones show the largest absolute increases.
+**What you should see:** Every corner needs ~65-67% more distance in wet conditions. Heavy braking zones show the largest absolute increases. The red/blue color coding makes the comparison immediately clear!
 
 ---
 
@@ -954,7 +986,7 @@ total_time_wet = sum([braking_distance(speeds[0], speeds[1], 1.2)[1]
 penalty_per_lap = total_time_wet - total_time_dry
 
 print("\n" + "=" * 60)
-print("LAP TIME IMPACT ANALYSIS")
+print("⏱️  LAP TIME IMPACT ANALYSIS")
 print("=" * 60)
 print(f"Total braking time (dry): {total_time_dry:.2f}s per lap")
 print(f"Total braking time (wet): {total_time_wet:.2f}s per lap")
@@ -977,6 +1009,7 @@ Now that we understand the basics, here's the full overhead track view:
 def plot_track_overhead():
     """
     Overhead track view showing dry vs wet braking zones.
+    Uses consistent color palette for professional presentation.
     """
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
     
@@ -985,15 +1018,15 @@ def plot_track_overhead():
     corner_labels = list(track_corners.keys())
     
     for ax, condition, mu, color, title_color in [
-        (ax1, 'DRY', 2.0, '#e10600', 'black'),
-        (ax2, 'WET', 1.2, '#0066cc', '#0066cc')
+        (ax1, 'DRY', 2.0, COLORS['f1_red'], 'black'),
+        (ax2, 'WET', 1.2, COLORS['wet_blue'], COLORS['wet_blue'])
     ]:
         ax.set_title(f'{condition} CONDITIONS (μ={mu})', 
                      fontsize=14, fontweight='bold', color=title_color)
         ax.set_xlim(-50, 1050)
         ax.set_ylim(-20, 100)
         ax.set_xlabel('Track Position (m)', fontsize=12)
-        ax.axhline(y=0, color='black', linewidth=3)
+        ax.axhline(y=0, color=COLORS['reference_black'], linewidth=3)
         
         for i, (corner_name, speeds) in enumerate(track_corners.items()):
             d, _ = braking_distance(speeds[0], speeds[1], mu)
@@ -1017,7 +1050,7 @@ def plot_track_overhead():
 plot_track_overhead()
 ```
 
-**What this shows:** How braking zones nearly double in the wet, completely changing the track's rhythm and braking markers.
+**What this shows:** How braking zones nearly double in the wet (red vs blue), completely changing the track's rhythm and braking markers. The consistent color coding makes the impact immediately visible!
 
 ---
 
@@ -1025,7 +1058,7 @@ plot_track_overhead()
 
 **Challenge:** If it starts raining mid-race, which corners become the most dangerous (largest absolute distance increase)? Which corners are relatively "safer" (smallest change)?
 
-**Extension:** Add intermediate conditions (damp, μ=1.5) and see how drivers must adjust as the track dries.
+**Extension:** Add intermediate conditions (damp, μ=1.5) and see how drivers must adjust as the track dries. Try to do it yourself, first. If stuck, ask the Colab AI how to accomplish the specific thing you're attempting.
 
 ---
 
@@ -1042,6 +1075,10 @@ plot_track_overhead()
 
 ### **Step 1: Import Widget Tools**
 
+We're going to do some fancier UI stuff, so we'll add another library.
+
+**Pro-Tip**: Open this in another tab for reference: https://ipywidgets.readthedocs.io/en/stable/
+
 ```python
 from ipywidgets import interact, FloatSlider, IntSlider
 ```
@@ -1050,10 +1087,13 @@ from ipywidgets import interact, FloatSlider, IntSlider
 
 ### **Step 2: Create Interactive Function**
 
+This is a huge function. Before copying and pasting, try to read it. Note any sections that you don't quite understand. After you paste it, ask the Colab AI what that line or lines is doing. Try to understand the whole function before evaluating it.
+
 ```python
 def interactive_braking(v_entry_kmh=280, v_corner_kmh=120, mu=2.0):
     """
     Interactive braking calculator with real-time updates.
+    Uses consistent color coding for professional presentation.
     """
     # Calculate parameters
     d_brake, t_brake = braking_distance(v_entry_kmh, v_corner_kmh, mu)
@@ -1065,17 +1105,31 @@ def interactive_braking(v_entry_kmh=280, v_corner_kmh=120, mu=2.0):
     x = np.linspace(0, d_brake, 200)
     v_x = np.sqrt(v1**2 - 2 * a_max * x) * 3.6
     
+    # Determine color based on grip level
+    if mu >= 1.8:
+        plot_color = COLORS['f1_red']
+        condition = 'Dry/Optimal'
+    elif mu >= 1.4:
+        plot_color = COLORS['damp_orange']
+        condition = 'Damp'
+    elif mu >= 1.0:
+        plot_color = COLORS['wet_blue']
+        condition = 'Wet'
+    else:
+        plot_color = COLORS['rain_green']
+        condition = 'Very Wet'
+    
     # Two-panel plot
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
     
     # LEFT: Braking zone visualization
-    ax1.plot(x, v_x, linewidth=3, color='#e10600')
-    ax1.fill_between(x, 0, v_x, alpha=0.2, color='red')
+    ax1.plot(x, v_x, linewidth=3, color=plot_color)
+    ax1.fill_between(x, 0, v_x, alpha=0.2, color=plot_color)
     ax1.axvline(x=0, color='green', linewidth=2, label='Braking point')
     ax1.axvline(x=d_brake, color='blue', linewidth=2, label='Turn-in')
     ax1.set_xlabel('Distance to Corner (m)', fontsize=12)
     ax1.set_ylabel('Velocity (km/h)', fontsize=12)
-    ax1.set_title(f'Braking Zone: {v_entry_kmh}→{v_corner_kmh} km/h', 
+    ax1.set_title(f'Braking Zone: {v_entry_kmh}→{v_corner_kmh} km/h ({condition})', 
                   fontsize=13, fontweight='bold')
     ax1.grid(True, alpha=0.3)
     ax1.legend()
@@ -1098,6 +1152,7 @@ def interactive_braking(v_entry_kmh=280, v_corner_kmh=120, mu=2.0):
     TIRE PERFORMANCE
     ───────────────────────────────────────
     Grip coefficient:   μ = {mu:.2f}
+    Condition:          {condition}
     Max deceleration:   {a_max:.2f} m/s²
     G-force:            {a_max/g:.2f}g
     
@@ -1146,13 +1201,14 @@ interact(interactive_braking,
 
 **You should have:**
 - Interactive sliders that update plots in real-time
+- **Color-coded plots** that change based on grip level (red=dry, blue=wet, green=very wet)
 - Performance metrics display
 - Comparison to road car performance
 
 **Challenge Scenarios to Try:**
-1. **Monaco Hairpin:** v_entry=180, v_corner=50, μ=2.0
-2. **Wet Monza T1:** v_entry=280, v_corner=120, μ=1.2
-3. **Degraded Tires:** v_entry=280, v_corner=120, μ=1.6
+1. **Monaco Hairpin:** v_entry=180, v_corner=50, μ=2.0 (should show red)
+2. **Wet Monza T1:** v_entry=280, v_corner=120, μ=1.2 (should show blue)
+3. **Degraded Tires:** v_entry=280, v_corner=120, μ=1.6 (should show orange)
 
 **Can you find:** The minimum grip (μ) needed to brake from 300→100 km/h in under 150 meters?
 
@@ -1160,13 +1216,14 @@ interact(interactive_braking,
 
 ## **Project Deliverables**
 
-Submit your Colab notebook with:
+If we wanted this Colab notebook to become a portfolio piece, here are some things to consider:
 
-### **1. Code (Well-Commented)**
+### **1. Code (Readable, Well-Commented)**
 - All stages completed and working
 - Clear physics explanations in comments
 - Meaningful variable names
 - Function docstrings
+- **Consistent use of COLORS palette throughout**
 
 ### **2. Visualizations**
 - Velocity vs time plot (Stage 1B)
@@ -1175,46 +1232,53 @@ Submit your Colab notebook with:
 - Corner entry visualization (Stage 3)
 - Track overhead view (Stage 4, if attempted)
 - Interactive tool screenshot (Stage 5, if attempted)
+- **All plots use consistent color coding**
 
 ### **3. Written Responses**
 
-**Physics Questions:**
-1. Explain why a_max = μg is independent of car mass. What does this mean for F1 vs GT car braking?
-2. The stopping distance formula contains v². If you double your speed from 150→300 km/h, how much does braking distance increase? Calculate specific values to support your answer.
-3. Compare braking from 280→120 km/h in dry (μ=2.0) vs wet (μ=1.2). Calculate both distances and explain the physical reason for the difference.
+**You can use Text cells to explore some Physics Questions in line. For example:**
+1. Explain why `a_max = μg` is independent of car mass. What does this mean for F1 vs GT car braking?
+2. **Why can F1 tires have μ > 1?** Explain the three physical reasons that allow this.
+3. The stopping distance formula contains v². If you double your speed from 150→300 km/h, how much does braking distance increase? Calculate specific values to support your answer.
+4. Compare braking from 280→120 km/h in dry (μ=2.0) vs wet (μ=1.2). Calculate both distances and explain the physical reason for the difference.
 
 **Strategic Analysis:**
-4. **The Late Braking Battle:** Driver A brakes at 220m before Turn 1 (280→120 km/h, μ=2.0). Driver B brakes at the optimal point. Calculate:
+5. **The Late Braking Battle:** Driver A brakes at 220m before Turn 1 (280→120 km/h, μ=2.0). Driver B brakes at the optimal point. Calculate:
    - The optimal braking distance
    - Driver A's speed at the optimal braking point
    - Driver B's advantage in km/h and meters
-5. Using the 5-corner track from Stage 4, calculate total time spent braking per lap in:
+6. Using the 5-corner track from Stage 4, calculate total time spent braking per lap in:
    - Dry conditions (μ=2.0)
    - Wet conditions (μ=1.2)
    What's the lap time penalty from braking alone?
 
 **Real-World Application:**
-6. An F1 driver overshoots their braking point by 15 meters. They were approaching at 300 km/h for a corner requiring 100 km/h entry (μ=2.0). What speed will they carry into the corner? Will they make it?
+7. An F1 driver overshoots their braking point by 15 meters. They were approaching at 300 km/h for a corner requiring 100 km/h entry (μ=2.0). What speed will they carry into the corner? Will they make it?
 
 **Reflection:**
-7. What surprised you most about F1 braking physics?
-8. How does this project change your understanding of what drivers must do lap after lap?
-9. If you were designing a driver training program, how would you use this simulator?
+8. What surprised you most about F1 braking physics?
+9. How does this project change your understanding of what drivers must do lap after lap?
+10. If you were designing a driver training program, how would you use this simulator?
 
 ---
 
 ## **Success Criteria**
 
+In terms of portfolio demo value, here are some criteria that you can use to anticipate how an admissions reviewer with
+some domain knowledge might judge your notebook:
+
 ### **Complete (Meets Expectations)**
 - ✅ Stages 1A, 1B, 2, and 3 fully functional
 - ✅ Code runs without errors
 - ✅ Plots are clear with proper labels and units
+- ✅ Consistent color coding used
 - ✅ Analysis questions answered with calculations
 
 ### **Proficient (Exceeds Expectations)**
 - ✅ All of above, plus:
 - ✅ Code well-commented with physics explanations
 - ✅ Professional visualizations with proper formatting
+- ✅ COLORS palette used throughout all plots
 - ✅ Stage 4 comparison analysis completed
 - ✅ Thoughtful responses showing physics understanding
 
@@ -1228,41 +1292,14 @@ Submit your Colab notebook with:
 ### **Exceptional (Goes Above and Beyond)**
 - ✅ All of above, plus:
 - ✅ Original extension (combined braking+cornering, downforce, etc.)
-- ✅ Real F1 data comparison or validation
+- ✅ Real F1 data comparison or validation (research where this can be found - would be great to have this or even virtualized (sim) data)
 - ✅ Could serve as teaching resource
-
----
-
-## **Tips for Success**
-
-### **Before You Start**
-- Review kinematic equations (v = v₀ - at, v² = v₀² - 2ad)
-- Understand that μ represents tire grip
-- Watch F1 onboard footage to see braking zones
-
-### **While Working**
-- Work sequentially through stages
-- Test each function before moving forward
-- Use print() to verify calculations
-- Check units constantly (km/h ↔ m/s)
-
-### **When Stuck**
-1. Check unit conversions (km/h needs /3.6 to become m/s)
-2. Verify equation signs (deceleration slows the car)
-3. Print intermediate values to debug
-4. Compare results to expected ranges
-
-### **Best Practices**
-- Comment physics formulas in code
-- Use descriptive names (`v_entry` not `v1`)
-- Label all plots with units
-- Include reality checks (compare to road cars)
 
 ---
 
 ## **Extensions & Next Steps**
 
-After completing this project, explore:
+After completing this project, there are several areas to explore next:
 
 1. **Friction Circle:** Model combined braking + cornering
 2. **Downforce:** Add speed-dependent grip (μ increases with v²)
@@ -1272,4 +1309,4 @@ After completing this project, explore:
 6. **Tire Degradation:** Model grip loss over stint
 7. **Race Strategy:** Optimize fuel vs lap time trade-offs
 
-**You've got this! 🏎️💨**
+Let's go! **You got this! 🏎️💨**
