@@ -1034,28 +1034,4 @@ After completing this project, you could:
 5. **Real Data Comparison:** Find actual trajectory data and validate your model
 6. **Game Integration:** Build a simple game where users try to hit targets
 
----
-
-## **Additional Resources**
-
-**Python & Colab:**
-- Google Colab Tutorial: [colab.research.google.com](https://colab.research.google.com)
-- Python Documentation: [docs.python.org](https://docs.python.org)
-
-**Physics:**
-- Khan Academy: Projectile Motion
-- HyperPhysics: Trajectory Calculations
-
-**Visualization:**
-- Matplotlib Gallery: [matplotlib.org/gallery](https://matplotlib.org/gallery)
-- Seaborn Tutorial (advanced plotting)
-
-**Engineering Applications:**
-- NASA Trajectory Simulations
-- Ballistics Research Laboratory Reports
-
----
-
-Remember: **The goal isn't perfection—it's progress.** Every engineer debugs code daily. Every plot goes through multiple iterations. The skills you're building here—translating physics to code, visualizing results, optimizing parameters—are exactly what you'll use in your career.
-
 **You've got this! 🚀**

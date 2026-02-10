@@ -40,6 +40,17 @@ class LessonViewer {
     });
     this.setupIntersectionObserver();
     this.setupScrollListener();
+    this.renderResources();
+  }
+
+  renderResources() {
+    const md = document.getElementById('resources-markdown').textContent;
+    document.getElementById('resources-content').innerHTML = marked.parse(md);
+    
+    // Ensure links in resources open in new tab
+    document.querySelectorAll('#resources-content a').forEach(a => {
+      a.setAttribute('target', '_blank');
+    });
   }
 
   setupScrollListener() {
@@ -141,6 +152,11 @@ class LessonViewer {
 
     this.renderStages();
     this.updateProgress();
+  }
+
+  toggleResources() {
+    const overlay = document.getElementById('resources-overlay');
+    overlay.classList.toggle('hidden');
   }
 
   renderStages() {

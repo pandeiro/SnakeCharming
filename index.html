@@ -118,6 +118,125 @@
        pointer-events: none;
      }
 
+     .help-btn {
+       background: transparent;
+       border: none;
+       color: var(--text-secondary);
+       cursor: pointer;
+       padding: 0.5rem;
+       transition: all 0.3s ease;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       border-radius: 50%;
+     }
+
+     .help-btn:hover {
+       color: var(--accent-primary);
+       background: rgba(74, 242, 161, 0.1);
+       transform: translateY(-1px);
+     }
+
+     .resources-overlay {
+       position: fixed;
+       top: 0;
+       left: 0;
+       right: 0;
+       bottom: 0;
+       background: rgba(10, 14, 22, 0.85);
+       backdrop-filter: blur(5px);
+       z-index: 2000;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       padding: 2rem;
+       opacity: 1;
+       transition: opacity 0.3s ease;
+       pointer-events: auto;
+     }
+
+     .resources-overlay.hidden {
+       opacity: 0;
+       pointer-events: none;
+     }
+
+     .resources-modal {
+       background: var(--bg-secondary);
+       border: 2px solid var(--accent-primary);
+       border-radius: 16px;
+       width: 100%;
+       max-width: 600px;
+       max-height: 80vh;
+       display: flex;
+       flex-direction: column;
+       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+       transform: scale(1);
+       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+     }
+
+     .resources-overlay.hidden .resources-modal {
+       transform: scale(0.9);
+     }
+
+     .resources-header {
+       padding: 1.5rem 2rem;
+       border-bottom: 1px solid var(--border-color);
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       background: var(--bg-tertiary);
+       border-radius: 14px 14px 0 0;
+     }
+
+     .resources-header h3 {
+       font-family: 'Space Grotesk', sans-serif;
+       color: var(--accent-primary);
+       font-size: 1.5rem;
+       margin: 0;
+     }
+
+     .close-resources-btn {
+       background: transparent;
+       border: none;
+       color: var(--text-secondary);
+       cursor: pointer;
+       padding: 0.5rem;
+       border-radius: 50%;
+       transition: all 0.2s ease;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+     }
+
+     .close-resources-btn:hover {
+       color: var(--accent-primary);
+       background: var(--bg-primary);
+     }
+
+     .resources-content {
+       padding: 2rem;
+       overflow-y: auto;
+       color: var(--text-secondary);
+       font-size: 1.1rem;
+     }
+
+     .resources-content ul {
+       margin-left: 1.5rem;
+       margin-bottom: 1rem;
+     }
+
+     .resources-content li {
+       margin-bottom: 0.75rem;
+     }
+
+     .resources-content strong {
+       color: var(--text-primary);
+       display: block;
+       margin-top: 1.5rem;
+       margin-bottom: 0.5rem;
+       font-family: 'Work Sans', sans-serif;
+     }
+
      .header-controls {
        display: flex;
        gap: 2rem;
@@ -863,6 +982,13 @@
             <div class="progress-fill" id="progress-fill"></div>
           </div>
           <span class="progress-label" id="progress-label">0%</span>
+          <button class="help-btn" onclick="window.lessonViewer.toggleResources()" title="Additional Resources">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -870,6 +996,42 @@
     <div class="container">
       <div id="lesson-content"></div>
     </div>
+
+    <div id="resources-overlay" class="resources-overlay hidden">
+      <div class="resources-modal">
+        <div class="resources-header">
+          <h3>Additional Resources</h3>
+          <button class="close-resources-btn" onclick="window.lessonViewer.toggleResources()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="resources-content" id="resources-content">
+          <!-- Rendered dynamically from #resources-markdown -->
+        </div>
+      </div>
+    </div>
+
+    <script type="text/markdown" id="resources-markdown">
+### Main
+- [Google Colab](https://colab.research.google.com) — The primary platform for running these engineering notebooks.
+
+### Reference
+- [NumPy API Reference](https://numpy.org/doc/stable/reference/index.html) — Documentation for scientific computing and array operations.
+- [Matplotlib Documentation](https://matplotlib.org/stable/contents.html) — Comprehensive guide for creating static and interactive visualizations.
+- [Python 3 Documentation](https://docs.python.org/3/) — Official language reference and standard library docs.
+- [Jupyter Notebook Docs](https://jupyter-notebook.readthedocs.io/en/stable/) — Guide to using interactive notebooks.
+
+### Inspiration
+- [Matplotlib Gallery](https://matplotlib.org/stable/gallery/index.html) — Hundreds of examples with source code.
+
+### Tutorials
+- [Matplotlib Pyplot Tutorial](https://matplotlib.org/stable/tutorials/introductory/pyplot.html) — Getting started with basic plotting.
+- [Python for Engineers](https://www.pythonforengineers.com/) — Practical applications of Python in engineering.
+- [Google Colab Guide](https://colab.research.google.com/notebooks/intro.ipynb) — Interactive introduction to Colab features.
+    </script>
 
     <div id="progress-notification" class="progress-notification hidden">
       <div class="progress-notification-text">
