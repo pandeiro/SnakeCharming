@@ -8,7 +8,7 @@
 1. **Clear Before/After Demonstration:** Watch a generic text generator become a recipe expert
 2. **Hands-On ML Pipeline:** Experience data preparation, training, and evaluation
 3. **Accessible Scale:** Complete on Google Colab's free tier in under 30 minutes
-4. **Foundation Skill:** Fine-tuning is how ChatGPT, Claude, and specialized AI tools are created
+4. **Foundation Skill:** Fine-tuning is a core component of how ChatGPT, Claude, and specialized AI tools are created and specialized.
 5. **Modern Technique:** Learn LoRA (Low-Rank Adaptation), the industry-standard approach
 
 **Prerequisites:** Basic Python (variables, loops, functions). No machine learning experience needed.
@@ -788,7 +788,7 @@ We're just demonstrating. The Trainer (next stage) will do this automatically.
 **Modern Reality:**
 - Most fine-tuning today uses LoRA or similar techniques
 - It's faster, cheaper, and often works better
-- This is how ChatGPT, Claude, and Gemini are adapted for specific tasks
+- Fine-tuning (alongside other techniques like RLHF and safety training) is how models like ChatGPT, Claude, and Gemini are adapted for specific tasks
 
 ---
 
@@ -812,7 +812,7 @@ lora_config = LoraConfig(
 lora_config = LoraConfig(
     r=8,                          # Rank of adapter matrices
     lora_alpha=16,                # Scaling factor
-    target_modules=["c_attn"],    # Adapt attention layers
+    target_modules=["c_attn"],    # Adapt attention layers (Note: names vary by model architecture; GPT-2 uses c_attn)
     lora_dropout=0.05,            # Dropout for regularization
     bias="none",
     task_type="CAUSAL_LM"
@@ -1637,7 +1637,7 @@ After completing this project, you could:
 - Uses techniques like LoRA to be efficient
 
 ### **Why does it matter?**
-- How ChatGPT became helpful (started as base GPT, fine-tuned on instructions)
+- How ChatGPT became helpful (it involves fine-tuning on instructions, alongside other complex techniques like RLHF)
 - How medical AI, legal AI, coding assistants are built
 - Core technique in modern AI development
 - Enables specialized AI without massive compute budgets
