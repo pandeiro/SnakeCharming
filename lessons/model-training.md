@@ -1038,7 +1038,7 @@ import math
 print("Evaluating base model...")
 eval_results_base = Trainer(
     model=base_for_comparison,
-    args=TrainingArguments(output_dir="./temp", report_to="none"),
+    args=training_args,  # Use same args for consistency
     data_collator=data_collator,
     eval_dataset=tokenized_val
 ).evaluate()
@@ -1068,6 +1068,7 @@ print(f"Reduction:                   {base_perplexity - ft_perplexity:.2f} ({(1 
 - **Perplexity = exp(loss)** 
 - Measures "how confused the model is"
 - Lower = better
+- **Note:** Perplexity is useful for before/after comparisons on the same dataset, not as a universal quality number.
 - Perplexity of 50 means the model is as confused as if choosing randomly from 50 options
 - **Expected results:**
   - Base model: perplexity ~30-50 (very confused about recipes)
