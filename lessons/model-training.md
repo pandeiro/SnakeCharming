@@ -548,6 +548,10 @@ print("Character count:", len(train_dataset[0]['text']))
 # Set padding token (GPT-2 doesn't have one by default)
 tokenizer.pad_token = tokenizer.eos_token
 
+# Add custom [END] token as a special token
+tokenizer.add_special_tokens({"additional_special_tokens": ["[END]"]})
+model.resize_token_embeddings(len(tokenizer))
+
 def tokenize_function(examples):
     """
     Convert text to tokens (numbers) with fixed length.
@@ -1112,7 +1116,7 @@ def compare_models(prompt, base_model, finetuned_model, max_length=200):
             do_sample=True,
             top_p=0.9,
             pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=tokenizer.encode("[END]")[0]  # Stop at [END]
+            eos_token_id=tokenizer.convert_tokens_to_ids("[END]")  # Stop at [END]
         )
     ft_text = tokenizer.decode(ft_output[0], skip_special_tokens=True)
     print(ft_text)
@@ -1235,7 +1239,7 @@ def test_temperatures(prompt, model, temperatures=[0.3, 0.7, 1.0, 1.5]):
                 temperature=temp,
                 do_sample=True,
                 pad_token_id=tokenizer.eos_token_id,
-                eos_token_id=tokenizer.encode("[END]")[0]
+                eos_token_id=tokenizer.convert_tokens_to_ids("[END]")
             )
         
         text = tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -1283,7 +1287,7 @@ def test_top_p(prompt, model, top_p_values=[0.5, 0.9, 0.95, 1.0]):
                 top_p=top_p,
                 do_sample=True,
                 pad_token_id=tokenizer.eos_token_id,
-                eos_token_id=tokenizer.encode("[END]")[0]
+                eos_token_id=tokenizer.convert_tokens_to_ids("[END]")
             )
         
         text = tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -1323,7 +1327,7 @@ def generate_custom_recipe(dish_name, temperature=0.8, top_p=0.9):
             top_p=top_p,
             do_sample=True,
             pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=tokenizer.encode("[END]")[0]
+            eos_token_id=tokenizer.convert_tokens_to_ids("[END]")
         )
     
     recipe = tokenizer.decode(outputs[0], skip_special_tokens=True)
