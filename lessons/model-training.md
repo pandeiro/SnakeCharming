@@ -435,10 +435,13 @@ def is_valid_recipe(example):
     return True
 
 # Filter the dataset
-print(f"Before filtering: {len(dataset):,} recipes")
+before_count = len(dataset)
 dataset = dataset.filter(is_valid_recipe)
-print(f"After filtering: {len(dataset):,} recipes")
-print(f"Removed: {len(dataset) - len(dataset.filter(is_valid_recipe)):,} low-quality recipes")
+after_count = len(dataset)
+
+print(f"Before filtering: {before_count:,} recipes")
+print(f"After filtering: {after_count:,} recipes")
+print(f"Removed: {before_count - after_count:,} low-quality recipes")
 ```
 
 **Why filtering matters:**
