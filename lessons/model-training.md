@@ -859,6 +859,7 @@ training_args = TrainingArguments(
     output_dir="./recipe-lora-model",
     num_train_epochs=3,                    # 3 passes through data
     per_device_train_batch_size=4,         # 4 recipes per batch
+    gradient_accumulation_steps=4,         # Accumulate gradients over 4 steps (effective batch size = 16)
     per_device_eval_batch_size=4,
     save_steps=500,                        # Save checkpoint every 500 steps
     save_total_limit=2,                    # Keep only 2 checkpoints (saves space)
@@ -879,6 +880,7 @@ print("✅ Training configuration set")
 **Understanding training parameters:**
 - **Epochs**: How many times to see the entire dataset (more ≠ always better)
 - **Batch size**: Recipes processed simultaneously (limited by GPU memory)
+- **Gradient Accumulation**: Allows you to simulate a larger batch size on limited memory. If batch=4 and accumulation=4, the effective batch size is 16.
 - **Learning rate**: How much to adjust weights each step (5e-5 = 0.00005)
 - **Warmup**: Gradually increases learning rate at start (prevents instability)
 
@@ -974,7 +976,7 @@ print("- NOT the full model (we only save the adapters!)")
 ### **Common Training Issues**
 
 **Problem:** "CUDA out of memory"
-- **Solution:** Reduce `per_device_train_batch_size` to 2 or even 1
+- **Solution:** Reduce `per_device_train_batch_size` to 2 or 1, and increase `gradient_accumulation_steps` to compensate (e.g., if batch=1, set accumulation=16).
 - **Why it happens:** GPU ran out of memory trying to process the batch
 
 **Problem:** Loss isn't decreasing
