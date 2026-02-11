@@ -7,7 +7,7 @@
 **Why This Project?**
 1. **Clear Before/After Demonstration:** Watch a generic text generator become a recipe expert
 2. **Hands-On ML Pipeline:** Experience data preparation, training, and evaluation
-3. **Accessible Scale:** Complete on Google Colab's free tier in under 30 minutes
+3. **Accessible Scale:** Training takes under 30 minutes on Google Colab's free tier
 4. **Foundation Skill:** Fine-tuning is a core component of how ChatGPT, Claude, and specialized AI tools are created and specialized.
 5. **Modern Technique:** Learn LoRA (Low-Rank Adaptation), the industry-standard approach
 
@@ -908,7 +908,7 @@ print(f"Validating on {len(tokenized_val)} recipes")
 ```python
 # This is where the magic happens
 print("🚀 Starting training...")
-print("This will take ~10-15 minutes on a T4 GPU")
+print("This will take ~10-30 minutes on a T4 GPU depending on Colab load")
 print("-" * 60)
 
 trainer.train()
@@ -967,7 +967,7 @@ print("- NOT the full model (we only save the adapters!)")
 - ✅ Loss decreased over time (from ~3.5 to ~1.5-2.0)
 - ✅ No out-of-memory errors
 - ✅ Model and adapters saved successfully
-- ✅ Total training time was reasonable (~10-20 min)
+- ✅ Total training time was reasonable (~10-30 min)
 
 ---
 
