@@ -295,6 +295,7 @@ from datasets import load_dataset
 
 # Load RecipeNLG dataset (large collection of recipes)
 print("Loading dataset... (this may take a minute)")
+# If "mbien/recipe_nlg" fails, try "recipe_nlg" as the dataset ID
 dataset = load_dataset("mbien/recipe_nlg", split="train")
 
 # Let's look at what we have
