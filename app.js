@@ -41,6 +41,31 @@ class LessonViewer {
     this.setupIntersectionObserver();
     this.setupScrollListener();
     this.renderResources();
+    this.setupScrollPositionSaving();
+  }
+
+  /**
+   * Set up automatic scroll position saving
+   */
+  setupScrollPositionSaving() {
+    // Save on beforeunload (page close/navigation)
+    window.addEventListener('beforeunload', () => {
+      this.saveScrollPosition(this.currentLessonFile);
+    });
+
+    // Save periodically (every 2 seconds)
+    setInterval(() => {
+      if (this.currentLessonFile) {
+        this.saveScrollPosition(this.currentLessonFile);
+      }
+    }, 2000);
+
+    // Save on visibility change (tab switch)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && this.currentLessonFile) {
+        this.saveScrollPosition(this.currentLessonFile);
+      }
+    });
   }
 
   renderResources() {
@@ -104,15 +129,18 @@ class LessonViewer {
       const response = await fetch(`lessons/${filename}`);
       if (!response.ok) throw new Error('Failed to load lesson');
       const markdown = await response.text();
-      
+
       const switchingLesson = this.currentLessonFile && this.currentLessonFile !== filename;
       this.currentLessonFile = filename;
-      
+
       this.loadProgress();
       this.loadRevealedBlocks();
-      
+
       this.parseAndRender(markdown);
-      
+
+      // Restore scroll position after content is rendered
+      this.restoreScrollPosition();
+
       if (this.completedStages.size > 0) {
         this.showProgressNotification(
           `<strong>Progress Restored:</strong> You've completed ${this.completedStages.size} stage${this.completedStages.size === 1 ? '' : 's'} in this lesson.`
@@ -549,12 +577,13 @@ class LessonViewer {
     this.completedStages.add(index);
     this.currentStage = Math.min(index + 1, this.stages.length - 1);
     this.saveProgress();
+    this.saveScrollPosition(this.currentLessonFile);
     this.showCelebration(index);
-    
+
     setTimeout(() => {
       this.renderStages();
       this.updateProgress();
-      
+
       if (index + 1 < this.stages.length) {
         document.getElementById(`stage-${index + 1}`).scrollIntoView({
           behavior: 'smooth',
@@ -622,7 +651,7 @@ class LessonViewer {
 
   loadProgress() {
     if (!this.currentLessonFile) return;
-    
+
     const saved = localStorage.getItem(`lessonProgress_${this.currentLessonFile}`);
     if (saved) {
       try {
@@ -637,6 +666,94 @@ class LessonViewer {
     } else {
       this.currentStage = 0;
       this.completedStages = new Set();
+    }
+  }
+
+  /**
+   * Save current scroll position to localStorage
+   * @param {string} filename - The current lesson filename
+   */
+  saveScrollPosition(filename) {
+    if (!filename) return;
+
+    const scrollData = {
+      scrollY: window.scrollY,
+      timestamp: new Date().toISOString()
+    };
+
+    // Find nearest stage header above current scroll position
+    const stages = document.querySelectorAll('.stage');
+    let nearestStageId = null;
+    
+    stages.forEach((stage, index) => {
+      const stageTop = stage.offsetTop;
+      if (stageTop <= scrollY + 100) {  // 100px buffer for header
+        nearestStageId = `stage-${index}`;
+        scrollData.nearestStageIndex = index;
+      }
+    });
+
+    scrollData.nearestStageId = nearestStageId;
+
+    try {
+      localStorage.setItem(
+        `scrollPosition_${filename}`,
+        JSON.stringify(scrollData)
+      );
+    } catch (e) {
+      console.warn('Failed to save scroll position:', e);
+    }
+  }
+
+  /**
+   * Load saved scroll position from localStorage
+   * @param {string} filename - The lesson filename
+   * @returns {{scrollY: number, nearestStageId: string, nearestStageIndex: number}|null}
+   */
+  loadScrollPosition(filename) {
+    if (!filename) return null;
+
+    const saved = localStorage.getItem(`scrollPosition_${filename}`);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse scroll position:', e);
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Restore scroll position with smooth animation
+   */
+  restoreScrollPosition() {
+    const scrollData = this.loadScrollPosition(this.currentLessonFile);
+    if (!scrollData) return;
+
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Prioritize stage ID over pixel position for accuracy
+    if (scrollData.nearestStageId) {
+      const stageElement = document.getElementById(scrollData.nearestStageId);
+      if (stageElement) {
+        stageElement.scrollIntoView({
+          behavior: prefersReducedMotion ? 'auto' : 'smooth',
+          block: 'start'
+        });
+        return;
+      }
+    }
+
+    // Fallback to pixel position
+    const targetY = scrollData.scrollY || 0;
+    if (targetY > 0) {
+      window.scrollTo({
+        top: targetY,
+        behavior: prefersReducedMotion ? 'auto' : 'smooth'
+      });
     }
   }
 
