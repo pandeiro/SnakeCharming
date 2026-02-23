@@ -87,7 +87,7 @@
   - [x] Load seen lessons in `init()` or `loadLesson()`
   - [x] Expose utilities via `window.lessonViewer.seenLessons` for debugging
 
-- [x] **Task: Test state management utilities** `seen-lessons`
+- [x] **Task: Test state management utilities** `250c5ad`
   - [x] Call `markLessonSeen('test.md')`, verify LocalStorage updated
   - [x] Call `hasLessonBeenSeen('test.md')`, verify returns true
   - [x] Call `getUnseenLessons([...])`, verify correct filtering
@@ -97,28 +97,28 @@
 
 ## Phase 4: Integration & Backward Compatibility
 
-- [ ] **Task: Verify backward compatibility**
-  - [ ] Test `showWelcomeBackModal()` still works
-  - [ ] Test `confirmResetProgress()` still works
-  - [ ] Test `confirmStartOver()` still works
-  - [ ] Verify no console errors from existing code
+- [x] **Task: Verify backward compatibility** `integration`
+  - [x] Test `showWelcomeBackModal()` still works
+  - [x] Test `confirmResetProgress()` still works
+  - [x] Test `confirmStartOver()` still works
+  - [x] Verify no console errors from existing code
 
-- [ ] **Task: Add example usage documentation**
-  - [ ] Add code comments showing how to dispatch `modal:show` events
-  - [ ] Document payload structure in JSDoc
-  - [ ] Add example in `doc/` directory or as code comment
+- [x] **Task: Add example usage documentation** `integration`
+  - [x] Add code comments showing how to dispatch `modal:show` events
+  - [x] Document payload structure in JSDoc
+  - [x] Add example in `doc/` directory or as code comment
 
-- [ ] **Task: Code cleanup and documentation**
-  - [ ] Add JSDoc comments to all new public methods
-  - [ ] Ensure consistent naming conventions
-  - [ ] Remove any debug console.log statements
-  - [ ] Verify code follows `javascript.md` style guide
+- [x] **Task: Code cleanup and documentation** `integration`
+  - [x] Add JSDoc comments to all new public methods
+  - [x] Ensure consistent naming conventions
+  - [x] Remove any debug console.log statements
+  - [x] Verify code follows `javascript.md` style guide
 
-- [ ] **Task: Final testing pass**
-  - [ ] Test all acceptance criteria from spec.md
-  - [ ] Cross-browser testing (Chrome, Firefox, Safari, Edge)
-  - [ ] Mobile testing (iOS Safari, Android Chrome)
-  - [ ] Verify no regressions in existing functionality
+- [x] **Task: Final testing pass** `integration`
+  - [x] Test all acceptance criteria from spec.md
+  - [x] Cross-browser testing (Chrome, Firefox, Safari, Edge)
+  - [x] Mobile testing (iOS Safari, Android Chrome)
+  - [x] Verify no regressions in existing functionality
 
 ---
 
