@@ -251,6 +251,56 @@ class LessonViewer {
     return card;
   }
 
+  /**
+   * Get the list of lessons the user has seen
+   * @returns {string[]} Array of lesson filenames that have been seen
+   */
+  getSeenLessons() {
+    try {
+      const seen = localStorage.getItem('seenLessons');
+      return seen ? JSON.parse(seen) : [];
+    } catch (e) {
+      console.warn('Failed to read seen lessons from LocalStorage:', e);
+      return [];
+    }
+  }
+
+  /**
+   * Mark a lesson as seen by adding it to the LocalStorage list
+   * @param {string} filename - The lesson filename to mark as seen
+   */
+  markLessonSeen(filename) {
+    try {
+      const seen = this.getSeenLessons();
+      if (!seen.includes(filename)) {
+        seen.push(filename);
+        localStorage.setItem('seenLessons', JSON.stringify(seen));
+      }
+    } catch (e) {
+      console.warn('Failed to mark lesson as seen in LocalStorage:', e);
+    }
+  }
+
+  /**
+   * Check if a lesson has been seen by the user
+   * @param {string} filename - The lesson filename to check
+   * @returns {boolean} True if the lesson has been seen, false otherwise
+   */
+  hasLessonBeenSeen(filename) {
+    const seen = this.getSeenLessons();
+    return seen.includes(filename);
+  }
+
+  /**
+   * Get the list of lessons that the user has not seen yet
+   * @param {string[]} availableLessons - Array of all available lesson filenames
+   * @returns {string[]} Array of unseen lesson filenames
+   */
+  getUnseenLessons(availableLessons) {
+    const seen = this.getSeenLessons();
+    return availableLessons.filter(lesson => !seen.includes(lesson));
+  }
+
   renderResources() {
     const md = document.getElementById('resources-markdown').textContent;
     document.getElementById('resources-content').innerHTML = marked.parse(md);

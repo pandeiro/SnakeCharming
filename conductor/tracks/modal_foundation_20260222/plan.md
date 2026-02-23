@@ -64,7 +64,7 @@
   - [x] Responsive layout for mobile
   - [x] Hover states for interactive elements
 
-- [x] **Task: Test lesson preview card rendering** `card-renderer`
+- [x] **Task: Test lesson preview card rendering** `4121954`
   - [x] Dispatch `modal:show` with lesson preview card content
   - [x] Verify card renders correctly
   - [x] Test on mobile viewport
@@ -74,24 +74,24 @@
 
 ## Phase 3: State Management Utilities
 
-- [ ] **Task: Implement seen lessons LocalStorage utilities**
-  - [ ] Add `getSeenLessons()` static method - reads from LocalStorage
-  - [ ] Add `markLessonSeen(filename)` method - adds to list, saves
-  - [ ] Add `hasLessonBeenSeen(filename)` method - returns boolean
-  - [ ] Add `getUnseenLessons(availableLessons)` method - filters list
-  - [ ] Handle LocalStorage unavailable gracefully (try/catch)
-  - [ ] Add JSDoc comments to all methods
+- [x] **Task: Implement seen lessons LocalStorage utilities** `seen-lessons`
+  - [x] Add `getSeenLessons()` static method - reads from LocalStorage
+  - [x] Add `markLessonSeen(filename)` method - adds to list, saves
+  - [x] Add `hasLessonBeenSeen(filename)` method - returns boolean
+  - [x] Add `getUnseenLessons(availableLessons)` method - filters list
+  - [x] Handle LocalStorage unavailable gracefully (try/catch)
+  - [x] Add JSDoc comments to all methods
 
-- [ ] **Task: Integrate state utilities with LessonViewer**
-  - [ ] Add `seenLessons` property to LessonViewer class
-  - [ ] Load seen lessons in `init()` or `loadLesson()`
-  - [ ] Expose utilities via `window.lessonViewer.seenLessons` for debugging
+- [x] **Task: Integrate state utilities with LessonViewer** `seen-lessons`
+  - [x] Add `seenLessons` property to LessonViewer class
+  - [x] Load seen lessons in `init()` or `loadLesson()`
+  - [x] Expose utilities via `window.lessonViewer.seenLessons` for debugging
 
-- [ ] **Task: Test state management utilities**
-  - [ ] Call `markLessonSeen('test.md')`, verify LocalStorage updated
-  - [ ] Call `hasLessonBeenSeen('test.md')`, verify returns true
-  - [ ] Call `getUnseenLessons([...])`, verify correct filtering
-  - [ ] Test with LocalStorage disabled (verify no errors)
+- [x] **Task: Test state management utilities** `seen-lessons`
+  - [x] Call `markLessonSeen('test.md')`, verify LocalStorage updated
+  - [x] Call `hasLessonBeenSeen('test.md')`, verify returns true
+  - [x] Call `getUnseenLessons([...])`, verify correct filtering
+  - [x] Test with LocalStorage disabled (verify no errors)
 
 ---
 
