@@ -2,12 +2,12 @@
 
 ## Phase 1: Core Event-Driven Modal System
 
-- [ ] **Task: Set up modal event listener infrastructure**
-  - [ ] Add `setupModalEventListeners()` method to `LessonViewer` class
-  - [ ] Register listeners for `modal:show` and `modal:hide` events in `init()`
-  - [ ] Create `handleModalShow(payload)` method that renders modal from payload
-  - [ ] Create `handleModalHide()` method that closes modal
-  - [ ] Add JSDoc comments to all new methods
+- [x] **Task: Set up modal event listener infrastructure** `modal-listeners`
+  - [x] Add `setupModalEventListeners()` method to `LessonViewer` class
+  - [x] Register listeners for `modal:show` and `modal:hide` events in `init()`
+  - [x] Create `handleModalShow(payload)` method that renders modal from payload
+  - [x] Create `handleModalHide()` method that closes modal
+  - [x] Add JSDoc comments to all new methods
 
 - [ ] **Task: Create generic modal HTML structure**
   - [ ] Add generic modal HTML to `index.html` (reusable container)

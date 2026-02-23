@@ -42,6 +42,7 @@ class LessonViewer {
     this.setupScrollListener();
     this.renderResources();
     this.setupScrollPositionSaving();
+    this.setupModalEventListeners();
   }
 
   /**
@@ -66,6 +67,141 @@ class LessonViewer {
         this.saveScrollPosition(this.currentLessonFile);
       }
     });
+  }
+
+  /**
+   * Set up event listeners for the generic modal system
+   * Listens for modal:show and modal:hide custom events on window
+   */
+  setupModalEventListeners() {
+    // Store reference to previously focused element for focus restoration
+    this.previouslyFocused = null;
+
+    // Listen for modal:show events
+    window.addEventListener('modal:show', (event) => {
+      this.handleModalShow(event.detail.payload);
+    });
+
+    // Listen for modal:hide events
+    window.addEventListener('modal:hide', () => {
+      this.handleModalHide();
+    });
+  }
+
+  /**
+   * Handle modal:show event - renders and displays a modal from payload
+   * @param {Object} payload - The modal configuration object
+   * @param {string} payload.type - Modal type: 'info' | 'confirm' | 'announcement' | 'custom'
+   * @param {string} payload.title - Modal title
+   * @param {string|HTMLElement} payload.content - Modal content (HTML string or DOM element)
+   * @param {Array} [payload.actions] - Array of action button configurations
+   */
+  handleModalShow(payload) {
+    // Store currently focused element for focus restoration
+    this.previouslyFocused = document.activeElement;
+
+    // Get or create modal container
+    let modalContainer = document.getElementById('generic-modal-overlay');
+    if (!modalContainer) {
+      modalContainer = this.createModalContainer();
+    }
+
+    // Populate modal content
+    const modal = modalContainer.querySelector('.modal');
+    const titleEl = modal.querySelector('.modal-title');
+    const contentEl = modal.querySelector('.modal-content-body');
+    const actionsEl = modal.querySelector('.modal-actions');
+
+    // Set title
+    titleEl.textContent = payload.title;
+
+    // Set content (support both string and DOM element)
+    contentEl.innerHTML = '';
+    if (typeof payload.content === 'string') {
+      contentEl.innerHTML = payload.content;
+    } else if (payload.content instanceof HTMLElement) {
+      contentEl.appendChild(payload.content);
+    }
+
+    // Render action buttons
+    actionsEl.innerHTML = '';
+    if (payload.actions && payload.actions.length > 0) {
+      payload.actions.forEach(action => {
+        const btn = document.createElement('button');
+        btn.className = `modal-btn modal-btn-${action.variant || 'secondary'}`;
+        btn.textContent = action.label;
+        btn.addEventListener('click', () => {
+          if (action.onClick) {
+            action.onClick();
+          }
+          this.handleModalHide();
+        });
+        actionsEl.appendChild(btn);
+      });
+    }
+
+    // Show modal
+    modalContainer.classList.remove('hidden');
+
+    // Focus first button or modal itself for accessibility
+    const firstButton = actionsEl.querySelector('button');
+    if (firstButton) {
+      setTimeout(() => firstButton.focus(), 100);
+    }
+  }
+
+  /**
+   * Handle modal:hide event - closes the currently displayed modal
+   */
+  handleModalHide() {
+    const modalContainer = document.getElementById('generic-modal-overlay');
+    if (modalContainer) {
+      modalContainer.classList.add('hidden');
+
+      // Restore focus to previously focused element
+      if (this.previouslyFocused && this.previouslyFocused.focus) {
+        this.previouslyFocused.focus();
+      }
+      this.previouslyFocused = null;
+    }
+  }
+
+  /**
+   * Create the generic modal container HTML structure
+   * @returns {HTMLElement} The modal container element
+   */
+  createModalContainer() {
+    const container = document.createElement('div');
+    container.id = 'generic-modal-overlay';
+    container.className = 'modal-overlay hidden';
+    container.innerHTML = `
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <h3 class="modal-title" id="modal-title"></h3>
+        </div>
+        <div class="modal-content-body"></div>
+        <div class="modal-actions"></div>
+      </div>
+    `;
+
+    // Add backdrop click handler
+    container.addEventListener('click', (e) => {
+      if (e.target === container) {
+        this.handleModalHide();
+      }
+    });
+
+    // Add Escape key handler
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        document.removeEventListener('keydown', handleEscape);
+        this.handleModalHide();
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    document.body.appendChild(container);
+    return container;
   }
 
   renderResources() {
