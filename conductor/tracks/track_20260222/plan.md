@@ -39,7 +39,7 @@
 
 ## Phase 2: Welcome-Back Modal
 
-- [ ] **Task: Create modal HTML structure**
+- [x] **Task: Create modal HTML structure** `modal-html`
   - Add modal HTML to `index.html` (can reuse existing modal patterns)
   - Include:
     - Modal container with `role="dialog"`
@@ -51,7 +51,7 @@
     - Two buttons: "Continue" and "Start Over"
   - Add backdrop overlay element
 
-- [ ] **Task: Add modal CSS styles**
+- [x] **Task: Add modal CSS styles** `modal-html`
   - Follow existing modal styling from `confirmResetProgress()`
   - Dark theme colors
   - Responsive sizing (max-width 500px)
@@ -59,7 +59,7 @@
   - Ensure touch-friendly buttons (min 44px height)
   - Add `prefers-reduced-motion` support
 
-- [ ] **Task: Implement `showWelcomeBackModal()` method**
+- [x] **Task: Implement `showWelcomeBackModal()` method** `modal-html`
   - Check if lesson has saved progress (skip if first visit)
   - Check if user disabled modal for this lesson
   - Populate modal with:
@@ -70,14 +70,14 @@
   - Trap focus within modal
   - Return Promise that resolves when modal closes
 
-- [ ] **Task: Implement modal action handlers**
+- [x] **Task: Implement modal action handlers** `modal-html`
   - **"Continue" button:** Close modal, trigger scroll restoration
   - **"Start Over" button:** Show confirmation, clear progress, reload lesson
   - **Checkbox:** Save preference to `skipWelcomeModal_[filename]`
   - **Backdrop click:** Close modal, still restore scroll
   - **Escape key:** Close modal, still restore scroll
 
-- [ ] **Task: Integrate modal into lesson load flow**
+- [x] **Task: Integrate modal into lesson load flow** `modal-html`
   - Modify `loadLesson()` method
   - After progress is loaded and content rendered:
     - Call `showWelcomeBackModal()` if applicable
@@ -85,7 +85,7 @@
     - Then restore scroll position
   - Ensure existing progress notification is suppressed when modal shown
 
-- [ ] **Task: Add accessibility features**
+- [x] **Task: Add accessibility features** `modal-html`
   - Focus trap implementation
   - Keyboard navigation (Tab, Escape, Enter)
   - Screen reader announcements

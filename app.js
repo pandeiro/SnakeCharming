@@ -138,25 +138,35 @@ class LessonViewer {
 
       this.parseAndRender(markdown);
 
-      // Restore scroll position after content is rendered
-      this.restoreScrollPosition();
+      // Check if we should show welcome back modal (has saved progress)
+      const savedProgress = localStorage.getItem(`lessonProgress_${filename}`);
+      const hasProgress = savedProgress && JSON.parse(savedProgress).completedStages?.length > 0;
 
-      if (this.completedStages.size > 0) {
-        this.showProgressNotification(
-          `<strong>Progress Restored:</strong> You've completed ${this.completedStages.size} stage${this.completedStages.size === 1 ? '' : 's'} in this lesson.`
-        );
-      } else if (switchingLesson) {
-        this.showProgressNotification(
-          `<strong>New Lesson:</strong> Starting fresh - no saved progress for this lesson yet.`
-        );
+      if (hasProgress) {
+        // Show welcome back modal, then restore scroll based on user action
+        await this.showWelcomeBackModal();
+        this.restoreScrollPosition();
       } else {
-        this.showProgressNotification(
-          `<strong>Lesson Loaded:</strong> Ready to begin! Complete stages to track your progress.`
-        );
+        // No saved progress, just restore scroll (will be at top)
+        this.restoreScrollPosition();
+
+        if (this.completedStages.size > 0) {
+          this.showProgressNotification(
+            `<strong>Progress Restored:</strong> You've completed ${this.completedStages.size} stage${this.completedStages.size === 1 ? '' : 's'} in this lesson.`
+          );
+        } else if (switchingLesson) {
+          this.showProgressNotification(
+            `<strong>New Lesson:</strong> Starting fresh - no saved progress for this lesson yet.`
+          );
+        } else {
+          this.showProgressNotification(
+            `<strong>Lesson Loaded:</strong> Ready to begin! Complete stages to track your progress.`
+          );
+        }
       }
     } catch (error) {
       console.error('Error loading lesson:', error);
-      document.getElementById('lesson-content').innerHTML = 
+      document.getElementById('lesson-content').innerHTML =
         '<p style="color: var(--reveal-timer); text-align: center; padding: 2rem;">Failed to load lesson. Make sure the markdown file is in the same directory.</p>';
     }
   }
@@ -810,20 +820,258 @@ class LessonViewer {
 
   resetProgress() {
     if (!this.currentLessonFile) return;
-    
+
     localStorage.removeItem(`lessonProgress_${this.currentLessonFile}`);
     localStorage.removeItem(`revealedBlocks_${this.currentLessonFile}`);
-    
+    localStorage.removeItem(`scrollPosition_${this.currentLessonFile}`);
+    localStorage.removeItem(`skipWelcomeModal_${this.currentLessonFile}`);
+
     this.currentStage = 0;
     this.completedStages = new Set();
     this.revealedBlockIds = new Set();
-    
+
     this.closeModal();
     this.loadLesson(this.currentLessonFile);
-    
+
     this.showProgressNotification(
       `<strong>Progress Reset:</strong> Starting fresh - all progress has been cleared.`
     );
+  }
+
+  /**
+   * Show welcome back modal for returning users
+   * @returns {Promise<'continue'|'startOver'>} User's choice
+   */
+  showWelcomeBackModal() {
+    return new Promise((resolve) => {
+      // Check if should skip modal
+      const skipPreference = localStorage.getItem(`skipWelcomeModal_${this.currentLessonFile}`);
+      if (skipPreference === 'true') {
+        resolve('continue');
+        return;
+      }
+
+      // Check if there's saved progress
+      const savedProgress = localStorage.getItem(`lessonProgress_${this.currentLessonFile}`);
+      if (!savedProgress) {
+        resolve('continue');
+        return;
+      }
+
+      try {
+        const progressData = JSON.parse(savedProgress);
+        const completedCount = progressData.completedStages ? progressData.completedStages.length : 0;
+
+        if (completedCount === 0) {
+          resolve('continue');
+          return;
+        }
+
+        // Populate modal content
+        const summaryEl = document.getElementById('welcome-back-summary');
+        const stagesEl = document.getElementById('welcome-back-stages');
+        const positionEl = document.getElementById('welcome-back-position');
+        const checkboxEl = document.getElementById('welcome-back-skip-checkbox');
+
+        // Summary text
+        summaryEl.textContent = `You've completed ${completedCount} of ${this.stages.length} stage${completedCount === 1 ? '' : 's'} in this lesson. Great work!`;
+
+        // List completed stages
+        stagesEl.innerHTML = '';
+        progressData.completedStages.forEach(stageIndex => {
+          if (stageIndex < this.stages.length) {
+            const stageTitle = this.extractStageTitle(this.stages[stageIndex]);
+            const stageItem = document.createElement('div');
+            stageItem.className = 'welcome-back-stage-item';
+            stageItem.innerHTML = `
+              <svg class="welcome-back-stage-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span class="welcome-back-stage-title">${stageTitle}</span>
+            `;
+            stagesEl.appendChild(stageItem);
+          }
+        });
+
+        // Last viewed position
+        const lastStageIndex = Math.max(...progressData.completedStages);
+        const lastStageTitle = this.extractStageTitle(this.stages[lastStageIndex]);
+        positionEl.innerHTML = `<strong>📍 Last viewed:</strong> ${lastStageTitle}`;
+
+        // Reset checkbox
+        checkboxEl.checked = false;
+
+        // Show modal
+        const overlay = document.getElementById('welcome-back-overlay');
+        overlay.classList.remove('hidden');
+
+        // Setup button handlers
+        const continueBtn = document.getElementById('welcome-back-continue-btn');
+        const startOverBtn = document.getElementById('welcome-back-start-over-btn');
+
+        // Clone buttons to remove old event listeners
+        const newContinueBtn = continueBtn.cloneNode(true);
+        const newStartOverBtn = startOverBtn.cloneNode(true);
+        continueBtn.parentNode.replaceChild(newContinueBtn, continueBtn);
+        startOverBtn.parentNode.replaceChild(newStartOverBtn, startOverBtn);
+
+        // Continue button handler
+        newContinueBtn.addEventListener('click', () => {
+          const skipChecked = checkboxEl.checked;
+          if (skipChecked) {
+            localStorage.setItem(`skipWelcomeModal_${this.currentLessonFile}`, 'true');
+          }
+          this.closeWelcomeBackModal();
+          resolve('continue');
+        });
+
+        // Start Over button handler
+        newStartOverBtn.addEventListener('click', () => {
+          this.closeWelcomeBackModal();
+          this.confirmStartOver().then(confirmed => {
+            if (confirmed) {
+              this.resetProgress();
+              resolve('startOver');
+            } else {
+              // User cancelled, show modal again
+              this.showWelcomeBackModal().then(resolve);
+            }
+          });
+        });
+
+        // Backdrop click handler
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) {
+            this.closeWelcomeBackModal();
+            resolve('continue');
+          }
+        });
+
+        // Escape key handler
+        const handleEscape = (e) => {
+          if (e.key === 'Escape') {
+            document.removeEventListener('keydown', handleEscape);
+            this.closeWelcomeBackModal();
+            resolve('continue');
+          }
+        };
+        document.addEventListener('keydown', handleEscape);
+
+        // Focus trap
+        this.trapFocus(overlay);
+
+      } catch (e) {
+        console.error('Error showing welcome back modal:', e);
+        resolve('continue');
+      }
+    });
+  }
+
+  /**
+   * Extract stage title from markdown content
+   * @param {string} markdown - The stage markdown
+   * @returns {string} The stage title
+   */
+  extractStageTitle(markdown) {
+    const titleMatch = markdown.match(/##\s+\*\*Stage\s+\d+:\s*([^*]+)\*\*/i) ||
+                       markdown.match(/##\s+([^\n]+)/);
+    return titleMatch ? titleMatch[1].trim() : 'Unknown Stage';
+  }
+
+  /**
+   * Close welcome back modal
+   */
+  closeWelcomeBackModal() {
+    const overlay = document.getElementById('welcome-back-overlay');
+    if (overlay) {
+      overlay.classList.add('hidden');
+    }
+  }
+
+  /**
+   * Confirm start over action
+   * @returns {Promise<boolean>} User's confirmation
+   */
+  confirmStartOver() {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+        <h3>⚠️ Start Over?</h3>
+        <p>This will clear all your progress for this lesson and start from the beginning. This action cannot be undone.</p>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-cancel" id="start-over-cancel-btn">Cancel</button>
+          <button class="modal-btn modal-btn-confirm" id="start-over-confirm-btn">Start Over</button>
+        </div>
+      `;
+
+      document.body.appendChild(overlay);
+      document.body.appendChild(modal);
+
+      const cancelBtn = document.getElementById('start-over-cancel-btn');
+      const confirmBtn = document.getElementById('start-over-confirm-btn');
+
+      const cleanup = () => {
+        overlay.remove();
+        modal.remove();
+      };
+
+      cancelBtn.addEventListener('click', () => {
+        cleanup();
+        resolve(false);
+      });
+
+      confirmBtn.addEventListener('click', () => {
+        cleanup();
+        resolve(true);
+      });
+
+      // Escape key handler
+      const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+          document.removeEventListener('keydown', handleEscape);
+          cleanup();
+          resolve(false);
+        }
+      };
+      document.addEventListener('keydown', handleEscape);
+    });
+  }
+
+  /**
+   * Trap focus within a container element for accessibility
+   * @param {HTMLElement} container - The container to trap focus within
+   */
+  trapFocus(container) {
+    const focusableElements = container.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+    // Focus first element
+    setTimeout(() => firstFocusable.focus(), 100);
+
+    const handleTabKey = (e) => {
+      if (e.key !== 'Tab') return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        }
+      } else {
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+    };
+
+    container.addEventListener('keydown', handleTabKey);
   }
 }
 
