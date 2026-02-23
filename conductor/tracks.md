@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: Enhanced Progress Restoration with Scroll Position and Welcome Modal**
+- [x] **Track: Enhanced Progress Restoration with Scroll Position and Welcome Modal**
   *Link: [./tracks/track_20260222/](./tracks/track_20260222/)*
