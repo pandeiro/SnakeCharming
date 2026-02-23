@@ -92,7 +92,7 @@
   - ARIA labels and roles
   - Focus restoration after modal closes
 
-- [ ] **Task: Test modal functionality**
+- [x] **Task: Test modal functionality** `3d100f0`
   - First visit: no modal appears
   - Return visit: modal appears with correct content
   - "Continue" works and scrolls to position
