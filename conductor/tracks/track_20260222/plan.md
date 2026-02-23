@@ -118,12 +118,12 @@
   - Auto-dismiss after 3 seconds
   - Less intrusive than full modal
 
-- [ ] **Task: Optimize scroll position saving**
+- [x] **Task: Optimize scroll position saving** `262fbf3`
   - Debounce scroll saves (don't save on every scroll event)
   - Save on stage completion
   - Save on visibility change (tab switch)
 
-- [ ] **Task: Code cleanup and documentation**
+- [x] **Task: Code cleanup and documentation** `cleanup-docs`
   - Add JSDoc comments to new methods
   - Ensure consistent naming conventions
   - Remove any debug console.log statements
