@@ -1330,6 +1330,98 @@
        }
      }
 
+     /* Lesson Preview Card Styles */
+     .lesson-preview-card {
+       background: var(--bg-secondary);
+       border: 1px solid var(--border-color);
+       border-radius: 12px;
+       padding: 1.5rem;
+       display: flex;
+       flex-direction: column;
+       gap: 1rem;
+     }
+
+     .lesson-preview-header {
+       display: flex;
+       align-items: center;
+       gap: 0.75rem;
+       margin-bottom: 0.5rem;
+     }
+
+     .lesson-preview-emoji {
+       font-size: 1.5rem;
+     }
+
+     .lesson-preview-title {
+       font-family: 'Space Grotesk', sans-serif;
+       color: var(--accent-primary);
+       font-size: 1.25rem;
+       font-weight: 700;
+       margin: 0;
+     }
+
+     .lesson-preview-description {
+       color: var(--text-secondary);
+       font-size: 0.95rem;
+       line-height: 1.5;
+       margin: 0;
+     }
+
+     .lesson-preview-metadata {
+       display: grid;
+       grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+       gap: 1rem;
+       padding-top: 0.5rem;
+       border-top: 1px solid var(--border-color);
+     }
+
+     .lesson-preview-meta-item {
+       display: flex;
+       flex-direction: column;
+       gap: 0.25rem;
+     }
+
+     .lesson-preview-meta-label {
+       font-family: 'Work Sans', sans-serif;
+       font-size: 0.75rem;
+       font-weight: 600;
+       color: var(--text-muted);
+       text-transform: uppercase;
+       letter-spacing: 0.05em;
+     }
+
+     .lesson-preview-meta-value {
+       font-family: 'Work Sans', sans-serif;
+       font-size: 0.9rem;
+       color: var(--text-primary);
+       font-weight: 500;
+     }
+
+     .lesson-preview-badge {
+       display: inline-block;
+       padding: 0.25rem 0.75rem;
+       border-radius: 12px;
+       font-family: 'Work Sans', sans-serif;
+       font-size: 0.75rem;
+       font-weight: 700;
+       text-transform: uppercase;
+       letter-spacing: 0.05em;
+       color: var(--bg-primary);
+       text-align: center;
+     }
+
+     @media (max-width: 500px) {
+       .lesson-preview-metadata {
+         grid-template-columns: 1fr;
+         gap: 0.75rem;
+       }
+
+       .lesson-preview-header {
+         flex-direction: column;
+         align-items: flex-start;
+       }
+     }
+
      blockquote {
        border-left: 4px solid var(--accent-secondary);
        padding-left: 1.5rem;

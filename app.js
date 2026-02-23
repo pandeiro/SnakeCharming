@@ -204,6 +204,53 @@ class LessonViewer {
     return container;
   }
 
+  /**
+   * Create a lesson preview card DOM element for announcement modals
+   * @param {Object} lessonData - The lesson data object
+   * @param {string} lessonData.name - Lesson name/title
+   * @param {string} lessonData.description - Brief lesson description
+   * @param {string} lessonData.difficulty - Difficulty level (e.g., 'Beginner', 'Intermediate', 'Advanced')
+   * @param {string} lessonData.time - Estimated completion time (e.g., '15-20 min')
+   * @param {string} lessonData.topic - Topic/category (e.g., 'Kinematics', 'Physics')
+   * @returns {HTMLElement} The lesson preview card DOM element
+   */
+  createLessonPreviewCard(lessonData) {
+    const card = document.createElement('div');
+    card.className = 'lesson-preview-card';
+
+    // Get difficulty badge color
+    const difficultyColors = {
+      'Beginner': 'var(--stage-complete)',
+      'Intermediate': 'var(--accent-secondary)',
+      'Advanced': 'var(--reveal-timer)'
+    };
+    const difficultyColor = difficultyColors[lessonData.difficulty] || 'var(--text-muted)';
+
+    card.innerHTML = `
+      <div class="lesson-preview-header">
+        <span class="lesson-preview-emoji">🎉</span>
+        <h4 class="lesson-preview-title">${lessonData.name}</h4>
+      </div>
+      <p class="lesson-preview-description">${lessonData.description}</p>
+      <div class="lesson-preview-metadata">
+        <div class="lesson-preview-meta-item">
+          <span class="lesson-preview-meta-label">Difficulty</span>
+          <span class="lesson-preview-badge" style="background-color: ${difficultyColor}">${lessonData.difficulty}</span>
+        </div>
+        <div class="lesson-preview-meta-item">
+          <span class="lesson-preview-meta-label">Time</span>
+          <span class="lesson-preview-meta-value">${lessonData.time}</span>
+        </div>
+        <div class="lesson-preview-meta-item">
+          <span class="lesson-preview-meta-label">Topic</span>
+          <span class="lesson-preview-meta-value">${lessonData.topic}</span>
+        </div>
+      </div>
+    `;
+
+    return card;
+  }
+
   renderResources() {
     const md = document.getElementById('resources-markdown').textContent;
     document.getElementById('resources-content').innerHTML = marked.parse(md);

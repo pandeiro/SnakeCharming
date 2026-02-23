@@ -9,66 +9,66 @@
   - [x] Create `handleModalHide()` method that closes modal
   - [x] Add JSDoc comments to all new methods
 
-- [ ] **Task: Create generic modal HTML structure**
-  - [ ] Add generic modal HTML to `index.html` (reusable container)
-  - [ ] Include: modal container, header (title), content area, actions area
-  - [ ] Add `role="dialog"`, `aria-modal="true"`, `aria-labelledby` attributes
-  - [ ] Add backdrop overlay element
-  - [ ] Modal hidden by default, shown via CSS class
+- [x] **Task: Create generic modal HTML structure** `977f52c`
+  - [x] Add generic modal HTML to `index.html` (reusable container)
+  - [x] Include: modal container, header (title), content area, actions area
+  - [x] Add `role="dialog"`, `aria-modal="true"`, `aria-labelledby` attributes
+  - [x] Add backdrop overlay element
+  - [x] Modal hidden by default, shown via CSS class
 
-- [ ] **Task: Add generic modal CSS styles**
-  - [ ] Add modal styles to `index.html` `<style>` block
-  - [ ] Follow existing modal naming convention (`.modal`, `.modal-content`, etc.)
-  - [ ] Dark theme colors matching existing design
-  - [ ] Responsive sizing (max-width 500px, shrink for mobile)
-  - [ ] Fade-in animation (0.3s ease)
-  - [ ] Touch-friendly buttons (min 44px height)
-  - [ ] `prefers-reduced-motion` support
+- [x] **Task: Add generic modal CSS styles** `977f52c`
+  - [x] Add modal styles to `index.html` `<style>` block
+  - [x] Follow existing modal naming convention (`.modal`, `.modal-content`, etc.)
+  - [x] Dark theme colors matching existing design
+  - [x] Responsive sizing (max-width 500px, shrink for mobile)
+  - [x] Fade-in animation (0.3s ease)
+  - [x] Touch-friendly buttons (min 44px height)
+  - [x] `prefers-reduced-motion` support
 
-- [ ] **Task: Implement modal rendering logic**
-  - [ ] Parse payload and populate modal title
-  - [ ] Support string content (innerHTML)
-  - [ ] Support DOM element content (appendChild)
-  - [ ] Render action buttons dynamically from payload
-  - [ ] Wire up button click handlers (call onClick, close modal)
-  - [ ] Add backdrop click handler (close modal)
-  - [ ] Add Escape key handler (close modal)
+- [x] **Task: Implement modal rendering logic** `977f52c`
+  - [x] Parse payload and populate modal title
+  - [x] Support string content (innerHTML)
+  - [x] Support DOM element content (appendChild)
+  - [x] Render action buttons dynamically from payload
+  - [x] Wire up button click handlers (call onClick, close modal)
+  - [x] Add backdrop click handler (close modal)
+  - [x] Add Escape key handler (close modal)
 
-- [ ] **Task: Implement focus restoration**
-  - [ ] Store `previouslyFocused` element before showing modal
-  - [ ] Restore focus on modal close
-  - [ ] Handle edge case: element no longer in DOM
+- [x] **Task: Implement focus restoration** `977f52c`
+  - [x] Store `previouslyFocused` element before showing modal
+  - [x] Restore focus on modal close
+  - [x] Handle edge case: element no longer in DOM
 
-- [ ] **Task: Test event-driven modal manually**
-  - [ ] Dispatch `modal:show` event with info modal payload
-  - [ ] Verify modal appears with correct content
-  - [ ] Test all close mechanisms (Escape, backdrop, button click)
-  - [ ] Verify focus restoration
-  - [ ] Test with different payload types
+- [x] **Task: Test event-driven modal manually** `977f52c`
+  - [x] Dispatch `modal:show` event with info modal payload
+  - [x] Verify modal appears with correct content
+  - [x] Test all close mechanisms (Escape, backdrop, button click)
+  - [x] Verify focus restoration
+  - [x] Test with different payload types
 
 ---
 
 ## Phase 2: Lesson Preview Card Component
 
-- [ ] **Task: Create lesson preview card renderer**
-  - [ ] Add `createLessonPreviewCard(lessonData)` method
-  - [ ] Card structure: header with emoji, description, metadata grid, actions
-  - [ ] Metadata fields: difficulty, time, topic
-  - [ ] Return DOM element (not HTML string)
-  - [ ] Follow existing CSS naming conventions
+- [x] **Task: Create lesson preview card renderer** `card-renderer`
+  - [x] Add `createLessonPreviewCard(lessonData)` method
+  - [x] Card structure: header with emoji, description, metadata grid, actions
+  - [x] Metadata fields: difficulty, time, topic
+  - [x] Return DOM element (not HTML string)
+  - [x] Follow existing CSS naming conventions
 
-- [ ] **Task: Add lesson preview card CSS styles**
-  - [ ] Card container with border and background
-  - [ ] Metadata grid layout (CSS Grid or Flexbox)
-  - [ ] Badge styling for difficulty level
-  - [ ] Responsive layout for mobile
-  - [ ] Hover states for interactive elements
+- [x] **Task: Add lesson preview card CSS styles** `card-renderer`
+  - [x] Card container with border and background
+  - [x] Metadata grid layout (CSS Grid or Flexbox)
+  - [x] Badge styling for difficulty level
+  - [x] Responsive layout for mobile
+  - [x] Hover states for interactive elements
 
-- [ ] **Task: Test lesson preview card rendering**
-  - [ ] Dispatch `modal:show` with lesson preview card content
-  - [ ] Verify card renders correctly
-  - [ ] Test on mobile viewport
-  - [ ] Verify button touch targets are adequate
+- [x] **Task: Test lesson preview card rendering** `card-renderer`
+  - [x] Dispatch `modal:show` with lesson preview card content
+  - [x] Verify card renders correctly
+  - [x] Test on mobile viewport
+  - [x] Verify button touch targets are adequate
 
 ---
 
