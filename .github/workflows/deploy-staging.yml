@@ -1,0 +1,44 @@
+name: Deploy to Staging
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Set staging deploy path
+        id: set-path
+        run: |
+          STAGING_PATH="${{ secrets.DEPLOY_PATH }}" | sed 's/sites/sites-staging/'
+          echo "staging_path=$STAGING_PATH" >> $GITHUB_OUTPUT
+
+      - name: Deploy via rsync
+        run: |
+          rsync -avz --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'conductor/' \
+            --exclude 'doc/' \
+            --exclude 'lessons/' \
+            --exclude '.gitignore' \
+            --exclude 'README.md' \
+            -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
+            ./ ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ steps.set-path.outputs.staging_path }}
+
+      - name: Clean up SSH
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_ed25519
