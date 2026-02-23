@@ -112,7 +112,7 @@
   - localStorage unavailable: graceful degradation, no errors
   - Very old saved progress: still works correctly
 
-- [ ] **Task: Add toast notification for skipped modal**
+- [x] **Task: Add toast notification for skipped modal** `toast-notif`
   - Create brief notification when modal is skipped
   - Shows "Progress restored. Scroll to last position..."
   - Auto-dismiss after 3 seconds

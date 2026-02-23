@@ -844,9 +844,10 @@ class LessonViewer {
    */
   showWelcomeBackModal() {
     return new Promise((resolve) => {
-      // Check if should skip modal
+      // Check if should skip modal (show toast instead)
       const skipPreference = localStorage.getItem(`skipWelcomeModal_${this.currentLessonFile}`);
       if (skipPreference === 'true') {
+        this.showToastNotification('Progress restored. Scroll to last position...');
         resolve('continue');
         return;
       }
@@ -1072,6 +1073,41 @@ class LessonViewer {
     };
 
     container.addEventListener('keydown', handleTabKey);
+  }
+
+  /**
+   * Show a brief toast notification
+   * @param {string} message - The message to display
+   * @param {number} duration - Duration in milliseconds before auto-dismiss
+   */
+  showToastNotification(message, duration = 3000) {
+    // Remove existing toast if any
+    const existingToast = document.querySelector('.toast-notification');
+    if (existingToast) {
+      existingToast.remove();
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `
+      <svg class="toast-notification-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/>
+      </svg>
+      <span class="toast-notification-text">${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+      toast.classList.add('show');
+    });
+
+    // Auto-dismiss
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, duration);
   }
 }
 
