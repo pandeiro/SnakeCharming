@@ -844,6 +844,9 @@ class LessonViewer {
    */
   showWelcomeBackModal() {
     return new Promise((resolve) => {
+      // Store the currently focused element for focus restoration
+      const previouslyFocused = document.activeElement;
+
       // Check if should skip modal (show toast instead)
       const skipPreference = localStorage.getItem(`skipWelcomeModal_${this.currentLessonFile}`);
       if (skipPreference === 'true') {
@@ -894,8 +897,10 @@ class LessonViewer {
           }
         });
 
-        // Last viewed position
-        const lastStageIndex = Math.max(...progressData.completedStages);
+        // Last viewed position - defensive check for empty array
+        const lastStageIndex = progressData.completedStages.length > 0
+          ? Math.max(...progressData.completedStages)
+          : 0;
         const lastStageTitle = this.extractStageTitle(this.stages[lastStageIndex]);
         positionEl.innerHTML = `<strong>📍 Last viewed:</strong> ${lastStageTitle}`;
 
@@ -922,7 +927,7 @@ class LessonViewer {
           if (skipChecked) {
             localStorage.setItem(`skipWelcomeModal_${this.currentLessonFile}`, 'true');
           }
-          this.closeWelcomeBackModal();
+          this.closeWelcomeBackModal(previouslyFocused);
           resolve('continue');
         });
 
@@ -943,7 +948,7 @@ class LessonViewer {
         // Backdrop click handler
         overlay.addEventListener('click', (e) => {
           if (e.target === overlay) {
-            this.closeWelcomeBackModal();
+            this.closeWelcomeBackModal(previouslyFocused);
             resolve('continue');
           }
         });
@@ -952,7 +957,7 @@ class LessonViewer {
         const handleEscape = (e) => {
           if (e.key === 'Escape') {
             document.removeEventListener('keydown', handleEscape);
-            this.closeWelcomeBackModal();
+            this.closeWelcomeBackModal(previouslyFocused);
             resolve('continue');
           }
         };
@@ -981,11 +986,16 @@ class LessonViewer {
 
   /**
    * Close welcome back modal
+   * @param {HTMLElement|null} previouslyFocused - Element to restore focus to
    */
-  closeWelcomeBackModal() {
+  closeWelcomeBackModal(previouslyFocused = null) {
     const overlay = document.getElementById('welcome-back-overlay');
     if (overlay) {
       overlay.classList.add('hidden');
+    }
+    // Restore focus to the previously focused element
+    if (previouslyFocused && previouslyFocused.focus) {
+      previouslyFocused.focus();
     }
   }
 
