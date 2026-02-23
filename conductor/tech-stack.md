@@ -85,6 +85,7 @@ SnakeCharming is a **zero-dependency static web application** designed for maxim
   - `revealedBlocks_[filename]` - Timed reveal state
   - `scrollPosition_[filename]` - Scroll position and nearest stage ID for restoration
   - `skipWelcomeModal_[filename]` - User preference to skip welcome-back modal
+  - `seenLessons` - Array of lesson filenames the user has seen (for announcement system)
 - **In-memory:** Current lesson state, reveal queue, observer patterns
 
 ---
