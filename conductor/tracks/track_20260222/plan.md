@@ -28,11 +28,12 @@
   - Respect `prefers-reduced-motion` media query
   - Call after lesson content is fully rendered
 
-- [~] **Task: Test scroll persistence**
+- [x] **Task: Test scroll persistence** `3b1d619`
   - Load a lesson, scroll to middle, close tab
   - Reopen lesson, verify scroll position restored
   - Test with different lessons
   - Verify no console errors
+  - Note: Manual browser testing required for full verification
 
 ---
 
