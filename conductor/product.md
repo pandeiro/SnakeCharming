@@ -72,6 +72,9 @@ SnakeCharming employs a **guided discovery** methodology where students:
 - Celebration animations for milestone achievements
 - Collapsible stage sections for focused learning
 - Syntax-highlighted code blocks with copy functionality
+- **Progress restoration** - Automatically saves and restores scroll position when returning to lessons
+- **Welcome-back modal** - Shows returning users their progress summary with option to continue or start over
+- **Toast notifications** - Brief, non-intrusive messages for progress restoration when modal is skipped
 
 ---
 
