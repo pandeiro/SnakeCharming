@@ -77,15 +77,15 @@ class LessonViewer {
     // Store reference to previously focused element for focus restoration
     this.previouslyFocused = null;
 
+    // Store handler references for potential cleanup
+    this._modalShowHandler = (event) => this.handleModalShow(event.detail.payload);
+    this._modalHideHandler = () => this.handleModalHide();
+
     // Listen for modal:show events
-    window.addEventListener('modal:show', (event) => {
-      this.handleModalShow(event.detail.payload);
-    });
+    window.addEventListener('modal:show', this._modalShowHandler);
 
     // Listen for modal:hide events
-    window.addEventListener('modal:hide', () => {
-      this.handleModalHide();
-    });
+    window.addEventListener('modal:hide', this._modalHideHandler);
   }
 
   /**
@@ -138,6 +138,13 @@ class LessonViewer {
         });
         actionsEl.appendChild(btn);
       });
+    } else {
+      // Add default Close button when no actions provided
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'modal-btn modal-btn-primary';
+      closeBtn.textContent = 'Close';
+      closeBtn.addEventListener('click', () => this.handleModalHide());
+      actionsEl.appendChild(closeBtn);
     }
 
     // Show modal
@@ -191,14 +198,13 @@ class LessonViewer {
       }
     });
 
-    // Add Escape key handler
+    // Add Escape key handler (auto-removes after triggering)
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
-        document.removeEventListener('keydown', handleEscape);
         this.handleModalHide();
       }
     };
-    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', handleEscape, { once: true });
 
     document.body.appendChild(container);
     return container;
@@ -218,13 +224,7 @@ class LessonViewer {
     const card = document.createElement('div');
     card.className = 'lesson-preview-card';
 
-    // Get difficulty badge color
-    const difficultyColors = {
-      'Beginner': 'var(--stage-complete)',
-      'Intermediate': 'var(--accent-secondary)',
-      'Advanced': 'var(--reveal-timer)'
-    };
-    const difficultyColor = difficultyColors[lessonData.difficulty] || 'var(--text-muted)';
+    const difficultyClass = lessonData.difficulty.toLowerCase();
 
     card.innerHTML = `
       <div class="lesson-preview-header">
@@ -235,7 +235,7 @@ class LessonViewer {
       <div class="lesson-preview-metadata">
         <div class="lesson-preview-meta-item">
           <span class="lesson-preview-meta-label">Difficulty</span>
-          <span class="lesson-preview-badge" style="background-color: ${difficultyColor}">${lessonData.difficulty}</span>
+          <span class="lesson-preview-badge lesson-preview-badge--${difficultyClass}">${lessonData.difficulty}</span>
         </div>
         <div class="lesson-preview-meta-item">
           <span class="lesson-preview-meta-label">Time</span>
