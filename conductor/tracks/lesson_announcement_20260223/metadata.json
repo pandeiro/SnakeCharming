@@ -1,8 +1,0 @@
-{
-  "track_id": "lesson_announcement_20260223",
-  "type": "feature",
-  "status": "new",
-  "created_at": "2026-02-23T00:00:00Z",
-  "updated_at": "2026-02-23T00:00:00Z",
-  "description": "New Lesson Announcement feature - automatically informs users about new lessons on page load"
-}
