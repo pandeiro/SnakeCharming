@@ -43,6 +43,7 @@ class LessonViewer {
     this.renderResources();
     this.setupScrollPositionSaving();
     this.setupModalEventListeners();
+    this.checkAndAnnounceNewLessons();
   }
 
   /**
@@ -299,6 +300,98 @@ class LessonViewer {
   getUnseenLessons(availableLessons) {
     const seen = this.getSeenLessons();
     return availableLessons.filter(lesson => !seen.includes(lesson));
+  }
+
+  /**
+   * Create a digest container with multiple lesson preview cards
+   * @param {Array} unseenLessons - Array of lesson objects with file, name, description, etc.
+   * @returns {HTMLElement} DOM element containing stacked lesson preview cards
+   */
+  createDigestContent(unseenLessons) {
+    const container = document.createElement('div');
+    container.className = 'lesson-digest-container';
+
+    // Sort lessons alphabetically by name
+    const sortedLessons = [...unseenLessons].sort((a, b) => a.name.localeCompare(b.name));
+
+    // Create intro text with count
+    const count = sortedLessons.length;
+    const introText = document.createElement('p');
+    introText.className = 'lesson-digest-intro';
+    introText.textContent = count === 1
+      ? `We've added a new lesson to help you learn Python programming!`
+      : `We've added ${count} new lessons to help you learn Python programming!`;
+    container.appendChild(introText);
+
+    // Create preview cards for each lesson
+    sortedLessons.forEach(lesson => {
+      // Map lesson data to the format expected by createLessonPreviewCard
+      const lessonData = {
+        name: lesson.name,
+        description: lesson.description || 'Explore new concepts and expand your coding skills.',
+        difficulty: lesson.difficulty || 'Intermediate',
+        time: lesson.time || '15-20 min',
+        topic: lesson.topic || 'Python Programming'
+      };
+
+      const card = this.createLessonPreviewCard(lessonData);
+      container.appendChild(card);
+    });
+
+    return container;
+  }
+
+  /**
+   * Check for unseen lessons and announce them via modal on page load
+   * Called from init() after modal event listeners are set up
+   */
+  checkAndAnnounceNewLessons() {
+    // Get lesson filenames from LESSONS array
+    const lessonFiles = LESSONS.map(l => l.file);
+
+    // Get unseen lessons
+    const unseenFiles = this.getUnseenLessons(lessonFiles);
+
+    // If no unseen lessons, silently return
+    if (unseenFiles.length === 0) {
+      return;
+    }
+
+    // Build full lesson objects for unseen lessons
+    const unseenLessons = unseenFiles.map(file => {
+      const lesson = LESSONS.find(l => l.file === file);
+      return lesson || { file, name: file.replace('.md', ''), description: '', difficulty: 'Intermediate', time: '15-20 min', topic: 'Python' };
+    });
+
+    // Create digest content
+    const digestContent = this.createDigestContent(unseenLessons);
+
+    // Dispatch modal:show event with slight delay to not block initial render
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('modal:show', {
+        detail: {
+          payload: {
+            type: 'announcement',
+            title: unseenLessons.length === 1
+              ? '🎉 New Lesson Available!'
+              : '🎉 New Lessons Available!',
+            content: digestContent,
+            actions: [
+              {
+                label: 'Got it!',
+                onClick: () => {
+                  // Mark all displayed lessons as seen
+                  unseenLessons.forEach(lesson => {
+                    this.markLessonSeen(lesson.file);
+                  });
+                },
+                variant: 'primary'
+              }
+            ]
+          }
+        }
+      }));
+    }, 500);
   }
 
   renderResources() {

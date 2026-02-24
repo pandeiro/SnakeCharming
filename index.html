@@ -1422,6 +1422,40 @@
        background-color: var(--reveal-timer);
      }
 
+     /* Lesson Digest Container Styles */
+     .lesson-digest-container {
+       display: flex;
+       flex-direction: column;
+       gap: 1rem;
+       max-height: 60vh;
+       overflow-y: auto;
+       padding-right: 0.5rem;
+     }
+
+     .lesson-digest-intro {
+       color: var(--text-secondary);
+       font-size: 0.95rem;
+       line-height: 1.5;
+       margin: 0 0 1rem 0;
+       padding-bottom: 1rem;
+       border-bottom: 1px solid var(--border-color);
+     }
+
+     .lesson-preview-card {
+       flex-shrink: 0;
+     }
+
+     @media (max-width: 500px) {
+       .lesson-digest-container {
+         max-height: 50vh;
+         gap: 0.75rem;
+       }
+
+       .lesson-digest-intro {
+         font-size: 0.9rem;
+       }
+     }
+
      @media (max-width: 500px) {
        .lesson-preview-metadata {
          grid-template-columns: 1fr;
