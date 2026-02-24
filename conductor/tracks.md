@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [~] **Track: New Lesson Announcement Feature**
+- [x] **Track: New Lesson Announcement Feature**
   *Link: [./tracks/lesson_announcement_20260223/](./tracks/lesson_announcement_20260223/)*
