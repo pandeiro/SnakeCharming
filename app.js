@@ -3,6 +3,10 @@ const LESSONS = [
   {
     name: 'Projectile Simulator',
     file: 'projectile-simulator.md'
+  },
+  {
+    name: 'F1 Braking',
+    file: 'f1-braking.md'
   }
   // Add more lessons here as { name: 'Lesson Name', file: 'filename.md' }
 ];
