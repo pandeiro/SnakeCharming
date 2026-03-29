@@ -1206,19 +1206,22 @@
        pointer-events: none;
      }
 
-     .modal-overlay .modal {
-       background: var(--bg-secondary);
-       border: 2px solid var(--accent-primary);
-       border-radius: 16px;
-       width: 100%;
-       max-width: 500px;
-       max-height: 80vh;
-       display: flex;
-       flex-direction: column;
-       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-       transform: scale(1);
-       transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-     }
+.modal-overlay .modal {
+        position: static;
+        top: auto;
+        left: auto;
+        background: var(--bg-secondary);
+        border: 2px solid var(--accent-primary);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        transform: scale(1);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
 
      .modal-overlay.hidden .modal {
        transform: scale(0.9);
